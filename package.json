@@ -1,0 +1,48 @@
+{
+  "name": "cmake-build-provider-for-pulsar-by-sporniket",
+  "version": "0.0.1",
+  "description": "A build provider to maintain a list of cmake targets, for Pulsar, the community-led, hyper-hackable text editor.",
+  "main": "lib/cmake-build-provider.js",
+  "module": "src/cmake-build-provider.js",
+  "exports": {
+    ".": {
+      "import": "./src/cmake-build-provider.js",
+      "require": "./lib/cmake-build-provider.js"
+    }
+  },
+  "scripts": {
+      "_format-package-json": "prettier -w package.json",
+      "_format-src": "eslint --fix src/*.js",
+      "_format-src-tests": "eslint --fix src-tests/*.js",
+      "format": "npm run _format-package-json && npm run _format-src && npm run _format-src-tests",
+      "_build-cjs-copy-resources": "cp src-cjs/* lib",
+      "_build-cjs-transpile": "babel --plugins @babel/plugin-transform-modules-commonjs src --out-dir lib",
+      "build-cjs": "npm run _build-cjs-transpile && npm run _build-cjs-copy-resources",
+      "rebuild-cjs": "rm -f lib/* && npm run build-cjs",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=.jest.config.cjs",
+    "prepack": "npm run rebuild-cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sporniket/cmake-build-provider-for-pulsar.git"
+  },
+  "keywords": [
+    "pulsar-edit",
+    "cmake",
+    "build"
+  ],
+  "author": "David SPORN",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/sporniket/cmake-build-provider-for-pulsar/issues"
+  },
+  "homepage": "https://github.com/sporniket/cmake-build-provider-for-pulsar#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2"
+  }
+}
