@@ -12,9 +12,11 @@ the community-led, hyper-hackable text editor..
 ****************************************/
 
 describe.each([
-    [cmakeBuildProvider.activate], [cmakeBuildProvider.deactivate]
-])('the main module has required function #%#', (f) => {
-    test(`${f} is a function`, () => {
-        expect(f).toBeInstanceOf(Function);
+    ["activate"],
+    ["deactivate"],
+    ["provideBuilder"]
+])('the main module has required function "%s"', (f) => {
+    test(`${cmakeBuildProvider[f]} is a function`, () => {
+        expect(cmakeBuildProvider[f]).toBeInstanceOf(Function);
     });
 });

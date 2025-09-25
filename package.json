@@ -10,6 +10,14 @@
             "require": "./lib/cmake-build-provider.js"
         }
     },
+    "providedServices": {
+        "builder": {
+            "description": "Provides build invocations for the current CMake project.",
+            "versions": {
+                "^2.0.0": "provideBuilder"
+            }
+        }
+    },
     "scripts": {
         "_format-package-json": "prettier -w package.json",
         "_format-src": "eslint --fix src/*.js",

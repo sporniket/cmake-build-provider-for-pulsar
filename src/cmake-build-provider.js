@@ -15,5 +15,6 @@ export default {
     deactivate() {},
     // actions entry points
     // provided services entry points
+    provideBuilder() {return {};},
     // consumed services entry points
 };
