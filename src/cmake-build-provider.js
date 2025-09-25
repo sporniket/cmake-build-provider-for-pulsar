@@ -10,11 +10,52 @@ A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
 
+class CmakeBuilderProvider {
+    constructor(cwd) {
+      // OPTIONAL: setup here
+      // cwd is the project root this provider will operate in, so store `cwd` in `this`.
+    }
+
+    destructor() {
+      // OPTIONAL: tear down here.
+      // destructor is not part of ES6. This is called by `build` like any
+      // other method before deactivating.
+      return 'void';
+    }
+
+    getNiceName() {
+      // REQUIRED: return a nice readable name of this provider.
+      return 'string';
+    }
+
+    isEligible() {
+      // REQUIRED: Perform operations to determine if this build provider can
+      // build the project in `cwd` (which was specified in `constructor`).
+      return 'boolean';
+    }
+
+    settings() {
+      // REQUIRED: Return an array of objects which each define a build description.
+      return 'array of objects'; // [ { ... }, { ... }, ]
+    }
+
+    on(event, cb) {
+      // OPTIONAL: The build provider can let `build` know when it is time to
+      // refresh targets.
+      return 'void';
+    }
+
+    removeAllListeners(event) {
+      // OPTIONAL: (required if `on` is defined) removes all listeners registered in `on`
+      return 'void';
+    }
+}
+
 export default {
     activate(state) {},
     deactivate() {},
     // actions entry points
     // provided services entry points
-    provideBuilder() {return {};},
+    provideBuilder() {return CmakeBuilderProvider;},
     // consumed services entry points
 };
