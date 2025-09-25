@@ -12,15 +12,13 @@ the community-led, hyper-hackable text editor..
 ****************************************/
 
 describe('\n  ======== PREFLIGHT the plugin looks valid ========\n', () => {
-    describe.each([
-        ['activate'],
-        ['deactivate'],
-        ['provideBuilder']
-    ])('the plugin has required function "%s"', (f) => {
-        const dut = cmakeBuildProvider[f]
-        test(`${dut} is a function`, () => {
-            expect(dut).toBeInstanceOf(Function);
-        });
+    describe('it has required functions', () => {
+        for (let f of ['activate', 'deactivate', 'provideBuilder']) {
+            const dut = cmakeBuildProvider[f];
+            test(`${f} is a function`, () => {
+                expect(dut).toBeInstanceOf(Function);
+            });
+        }
     });
 });
 
@@ -50,14 +48,21 @@ describe('\n  ======== LIFECYCLE plugin deactivation ========\n', () => {
 
 describe('\n  ======== SERVICE providing «builder» ========\n', () => {
     describe('[TODO] it MUST returns a builder provider', () => {
-        const providerClass = cmakeBuildProvider.provideBuilder()
+        const providerClass = cmakeBuildProvider.provideBuilder();
         expect(providerClass).toBeDefined();
-        const provider = new providerClass("whatever")
-        for(let f of ["constructor","destructor","getNiceName", "isEligible", "settings", "on", "removeAllListeners"]) {
-            const dut = provider[f]
-            test(`${dut} is a function`, () => {
-                expect(dut).toBeInstanceOf(Function)
-            })
+        const provider = new providerClass('whatever');
+        for (let f of ['constructor', 'destructor', 'getNiceName', 'isEligible', 'settings', 'on', 'removeAllListeners']) {
+            const dut = provider[f];
+            test(`${f} is a function`, () => {
+                expect(dut).toBeInstanceOf(Function);
+            });
         }
+    });
+    describe('CmakeBuilderProvider', () => {
+        const providerClass = cmakeBuildProvider.provideBuilder();
+        const provider = new providerClass('whatever');
+        test('It MUST return the expected nice name', () => {
+            expect(provider.getNiceName()).toBe('CMake builders of \'whatever\'');
+        });
     });
 });
