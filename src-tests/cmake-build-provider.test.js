@@ -58,11 +58,23 @@ describe('\n  ======== SERVICE providing «builder» ========\n', () => {
             });
         }
     });
-    describe('CmakeBuilderProvider', () => {
+    describe('Class CmakeBuilderProvider', () => {
         const providerClass = cmakeBuildProvider.provideBuilder();
         const provider = new providerClass('whatever');
         test('It MUST return the expected nice name', () => {
             expect(provider.getNiceName()).toBe('CMake builders of \'whatever\'');
+        });
+        test('It MUST always be eligible', () => {
+            expect(provider.isEligible()).toBe(true);
+        });
+        test('It MUST return a list of builds', () => {
+            expect(provider.settings()).toStrictEqual([{
+                'cmd': 'echo',
+                'name': 'cmake:whatever> echo',
+                'args': ['CMake builders of \'whatever\''],
+                'sh': true,
+                'cwd': 'whatever'
+            }]);
         });
     });
 });

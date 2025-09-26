@@ -36,12 +36,18 @@ function createCmakeBuilderProviderClass(globals, config) {
         isEligible() {
             // REQUIRED: Perform operations to determine if this build provider can
             // build the project in `cwd` (which was specified in `constructor`).
-            return 'boolean';
+            return true;
         }
 
         settings() {
             // REQUIRED: Return an array of objects which each define a build description.
-            return 'array of objects'; // [ { ... }, { ... }, ]
+            return [{
+                'cmd': 'echo',
+                'name': `cmake:${this.#basedir}> echo`,
+                'args': [`CMake builders of '${this.#basedir}'`],
+                'sh': true,
+                'cwd': `${this.#basedir}`
+            }]; // [ { ... }, { ... }, ]
         }
 
         on(event, cb) {
