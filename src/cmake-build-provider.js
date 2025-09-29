@@ -13,8 +13,12 @@ the community-led, hyper-hackable text editor..
 ****************************************/
 
 export default {
-    activate(state) {},
-    deactivate() {},
+    activate(state) {
+        console.log('CMake build provider activated.');
+    },
+    deactivate() {
+        console.log('CMake build provider de-activated.');
+    },
     // actions entry points
     // provided services entry points
     provideBuilder() {return createCmakeBuilderProviderClass({}, {niceName: {prefix: 'CMake builders of'}});},

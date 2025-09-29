@@ -1,4 +1,7 @@
 'use strict';
+
+import {jest} from '@jest/globals';
+
 import cmakeBuildProvider from '../src/cmake-build-provider';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
@@ -11,18 +14,17 @@ A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
 
-describe('\n  ======== PREFLIGHT the plugin looks valid ========\n', () => {
-    describe('it has required functions', () => {
-        for (let f of ['activate', 'deactivate', 'provideBuilder']) {
-            const dut = cmakeBuildProvider[f];
-            test(`${f} is a function`, () => {
-                expect(dut).toBeInstanceOf(Function);
-            });
-        }
+describe('It MUST have an activate() method', () => {
+    const dut = cmakeBuildProvider.activate;
+    test('cmakeBuildProvider.activate is a Function', () => {
+        expect(dut).toBeInstanceOf(Function);
     });
-});
-
-describe('\n  ======== LIFECYCLE plugin activation ========\n', () => {
+    test('cmakeBuildProvider.activate() logs a message', () => {
+        const logger = jest.fn();
+        console.log = logger;
+        dut({});
+        expect(logger).toHaveBeenCalledWith('CMake build provider activated.');
+    });
     test('[TODO] it MUST reload plugin configuration', () => {
         expect('TODO').toBeDefined();
     });
@@ -34,7 +36,17 @@ describe('\n  ======== LIFECYCLE plugin activation ========\n', () => {
     });
 });
 
-describe('\n  ======== LIFECYCLE plugin deactivation ========\n', () => {
+describe('It MUST have an deactivate() method', () => {
+    const dut = cmakeBuildProvider.deactivate;
+    test('cmakeBuildProvider.deactivate is a Function', () => {
+        expect(dut).toBeInstanceOf(Function);
+    });
+    test('cmakeBuildProvider.deactivate() logs a message', () => {
+        const logger = jest.fn();
+        console.log = logger;
+        dut();
+        expect(logger).toHaveBeenCalledWith('CMake build provider de-activated.');
+    });
     test('[TODO] it MUST serialize latest states', () => {
         expect('TODO').toBeDefined();
     });
@@ -46,16 +58,13 @@ describe('\n  ======== LIFECYCLE plugin deactivation ========\n', () => {
     });
 });
 
-describe('\n  ======== SERVICE providing «builder» ========\n', () => {
-    describe('[TODO] it MUST returns a builder provider', () => {
+describe('It MUST have an provideBuilder() method', () => {
+    const dut = cmakeBuildProvider.provideBuilder;
+    test('cmakeBuildProvider.provideBuilder is a Function', () => {
+        expect(dut).toBeInstanceOf(Function);
+    });
+    test('cmakeBuildProvider.provideBuilder() return a class that can be instanciated', () => {
         const providerClass = cmakeBuildProvider.provideBuilder();
-        expect(providerClass).toBeDefined();
-        const provider = new providerClass('whatever');
-        for (let f of ['constructor', 'destructor', 'getNiceName', 'isEligible', 'settings', 'on', 'removeAllListeners']) {
-            const dut = provider[f];
-            test(`${f} is a function`, () => {
-                expect(dut).toBeInstanceOf(Function);
-            });
-        }
+        expect(new providerClass('my_path').getNiceName()).toBe('CMake builders of \'my_path\'');
     });
 });
