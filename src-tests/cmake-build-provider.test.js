@@ -25,15 +25,6 @@ describe('It MUST have an activate() method', () => {
         dut({});
         expect(logger).toHaveBeenCalledWith('CMake build provider activated.');
     });
-    test('[TODO] it MUST reload plugin configuration', () => {
-        expect('TODO').toBeDefined();
-    });
-    test('[TODO] it MUST reload the configuration of each projects', () => {
-        expect('TODO').toBeDefined();
-    });
-    test('[TODO] it MUST defer resyncing projects', () => {
-        expect('TODO').toBeDefined();
-    });
 });
 
 describe('It MUST have an deactivate() method', () => {
@@ -46,15 +37,6 @@ describe('It MUST have an deactivate() method', () => {
         console.log = logger;
         dut();
         expect(logger).toHaveBeenCalledWith('CMake build provider de-activated.');
-    });
-    test('[TODO] it MUST serialize latest states', () => {
-        expect('TODO').toBeDefined();
-    });
-    test('[TODO] it MUST unsubscribe from any subscriptions', () => {
-        expect('TODO').toBeDefined();
-    });
-    test('[TODO] it MUST defer resyncing projects', () => {
-        expect('TODO').toBeDefined();
     });
 });
 
