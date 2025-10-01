@@ -20,6 +20,9 @@ export default {
         console.log('CMake build provider de-activated.');
     },
     // actions entry points
+    toggleMain() {
+        atom.workspace.toggle('atom://cmake-builder-provider-by-sporniket/main');
+    },
     // provided services entry points
     provideBuilder() {return createCmakeBuilderProviderClass({}, {niceName: {prefix: 'CMake builders of'}});},
     // consumed services entry points

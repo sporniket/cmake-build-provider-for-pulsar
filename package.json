@@ -10,6 +10,9 @@
             "require": "./lib/cmake-build-provider.js"
         }
     },
+    "engines": {
+        "atom": ">=1.0.0 <2.0.0"
+    },
     "providedServices": {
         "builder": {
             "description": "Provides build invocations for the current CMake project.",

@@ -40,6 +40,24 @@ describe('It MUST have an deactivate() method', () => {
     });
 });
 
+describe('It MUST have a toggleMain() method', () => {
+    const dut = cmakeBuildProvider.toggleMain;
+    test('cmakeBuildProvider.toggleMain is a Function', () => {
+        expect(dut).toBeInstanceOf(Function);
+    });
+    test('cmakeBuildProvider.toggleMain() calls atom.workspace.toggle()', () => {
+        const origAtom = globalThis.atom;
+        globalThis.atom = {
+            workspace: {
+                toggle: jest.fn()
+            }
+        };
+        dut();
+        expect(atom.workspace.toggle).toHaveBeenCalledWith('atom://cmake-builder-provider-by-sporniket/main');
+        globalThis.atom = origAtom;
+    });
+});
+
 describe('It MUST have an provideBuilder() method', () => {
     const dut = cmakeBuildProvider.provideBuilder;
     test('cmakeBuildProvider.provideBuilder is a Function', () => {
