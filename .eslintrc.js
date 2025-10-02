@@ -21,7 +21,8 @@ module.exports = {
         "expect": true,
         "test": true,
         "jest": true,
-        "beforeEach": true
+        "beforeEach": true,
+        "afterEach": true
     },
     "rules": {
         "no-caller": "error",

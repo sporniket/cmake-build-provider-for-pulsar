@@ -3,6 +3,8 @@
 import {jest} from '@jest/globals';
 
 import cmakeBuildProvider from '../src/cmake-build-provider';
+
+import {inject} from './injector.js';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
 
@@ -14,16 +16,32 @@ A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
 
+let origStateGlobal;
+
+let origStateConsole;
+
+beforeEach(() => {
+    origStateConsole = inject({log: jest.fn()}, console);
+    origStateGlobal = inject({atom: {
+        workspace: {
+            toggle: jest.fn()
+        }
+    }}, globalThis);
+});
+
+afterEach(() =>{
+    inject(origStateConsole, console);
+    inject(origStateGlobal, globalThis);
+});
+
 describe('It MUST have an activate() method', () => {
     const dut = cmakeBuildProvider.activate;
     test('cmakeBuildProvider.activate is a Function', () => {
         expect(dut).toBeInstanceOf(Function);
     });
     test('cmakeBuildProvider.activate() logs a message', () => {
-        const logger = jest.fn();
-        console.log = logger;
         dut({});
-        expect(logger).toHaveBeenCalledWith('CMake build provider activated.');
+        expect(console.log).toHaveBeenCalledWith('CMake build provider activated.');
     });
 });
 
@@ -33,10 +51,8 @@ describe('It MUST have an deactivate() method', () => {
         expect(dut).toBeInstanceOf(Function);
     });
     test('cmakeBuildProvider.deactivate() logs a message', () => {
-        const logger = jest.fn();
-        console.log = logger;
         dut();
-        expect(logger).toHaveBeenCalledWith('CMake build provider de-activated.');
+        expect(console.log).toHaveBeenCalledWith('CMake build provider de-activated.');
     });
 });
 
@@ -46,15 +62,8 @@ describe('It MUST have a toggleMain() method', () => {
         expect(dut).toBeInstanceOf(Function);
     });
     test('cmakeBuildProvider.toggleMain() calls atom.workspace.toggle()', () => {
-        const origAtom = globalThis.atom;
-        globalThis.atom = {
-            workspace: {
-                toggle: jest.fn()
-            }
-        };
         dut();
         expect(atom.workspace.toggle).toHaveBeenCalledWith('atom://cmake-builder-provider-by-sporniket/main');
-        globalThis.atom = origAtom;
     });
 });
 
