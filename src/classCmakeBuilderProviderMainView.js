@@ -14,9 +14,31 @@ export function createCmakeBuilderProviderMainViewClass(globals, config) {
         #globals = globals;
         #config = config;
         #element;
+        #subscriptions;
 
         constructor(serializedState) {
-            this.#element = {};
+            this.#element = this.#globals.document.createElement('div');
+            this.#element.classList.add('cmake-builder-provider-by-sporniket-main');
+
+            const message = this.#globals.document.createElement('div');
+            message.textContent = 'The CmakeBuilderProviderMainView is here';
+            message.classList.add('message');
+            this.#element.appendChild(message);
+
+            // TODO : change callback for something usefull.
+            this.#subscriptions = this.#globals.atom.workspace.getCenter().observeActivePaneItem(item => {
+                if (!atom.workspace.isTextEditor(item)) {return;}
+                message.innerHTML = `
+        <h2>${item.getFileName() || 'untitled'}</h2>
+        <ul>
+          <li><b>Soft Wrap:</b> ${item.softWrapped}</li>
+          <li><b>Tab Length:</b> ${item.getTabLength()}</li>
+          <li><b>Encoding:</b> ${item.getEncoding()}</li>
+          <li><b>Line Count:</b> ${item.getLineCount()}</li>
+        </ul>
+      `;
+            });
+            this.#globals.log('Constructed CmakeBuilderProviderMainView.');
         }
 
         getTitle() {
@@ -43,6 +65,9 @@ export function createCmakeBuilderProviderMainViewClass(globals, config) {
             return {};
         }
 
-        destroy() {}
+        destroy() {
+            this.#subscriptions.dispose();
+            this.#element.remove();
+        }
     };
 }

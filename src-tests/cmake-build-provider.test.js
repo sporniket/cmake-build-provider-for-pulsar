@@ -67,7 +67,7 @@ describe('It MUST have a toggleMain() method', () => {
     });
 });
 
-describe('It MUST have an provideBuilder() method', () => {
+describe('It MUST have a provideBuilder() method', () => {
     const dut = cmakeBuildProvider.provideBuilder;
     test('cmakeBuildProvider.provideBuilder is a Function', () => {
         expect(dut).toBeInstanceOf(Function);
