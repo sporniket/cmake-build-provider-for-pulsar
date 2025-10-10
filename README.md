@@ -37,7 +37,18 @@ Content
 
 ### From sources
 
-> TO BE WRITTEN -- clone the repo and use ppm or something
+Close the pulsar editor.
+
+Then, clone the repository, build, and link it using `ppm`.
+
+```
+git clone https://github.com/sporniket/cmake-build-provider-for-pulsar.git
+cd cmake-build-provider-for-pulsar
+npm run rebuild-cjs
+ppm link
+```
+
+Then start the pulsar editor.
 
 ### From the package manager
 
