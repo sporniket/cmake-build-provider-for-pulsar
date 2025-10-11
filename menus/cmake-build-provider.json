@@ -1,0 +1,18 @@
+{
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "Cmake build provider by sporniket",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "cmake-build-provider-for-pulsar-by-sporniket:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
