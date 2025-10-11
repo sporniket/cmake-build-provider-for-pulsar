@@ -1,7 +1,7 @@
 'use strict';
 
 import {jest} from '@jest/globals';
-
+import {documentMock} from './mock-jsdom.js';
 import cmakeBuildProvider from '../src/cmake-build-provider';
 
 import {inject} from './injector.js';
@@ -24,8 +24,10 @@ beforeEach(() => {
     origStateConsole = inject({log: jest.fn()}, console);
     origStateGlobal = inject({atom: {
         workspace: {
-            toggle: jest.fn()
-        }
+            toggle: jest.fn(),
+            addOpener: jest.fn()
+        },
+        document: documentMock
     }}, globalThis);
 });
 
@@ -42,6 +44,17 @@ describe('It MUST have an activate() method', () => {
     test('cmakeBuildProvider.activate() logs a message', () => {
         dut({});
         expect(console.log).toHaveBeenCalledWith('CMake build provider activated.');
+    });
+    test('cmakeBuildProvider.activate() add a valid opener', () => {
+        dut({}, {atom, document: documentMock, log: origStateConsole.log});
+        expect(atom.workspace.addOpener).toHaveBeenCalledTimes(1);
+        const args = atom.workspace.addOpener.mock.calls[0];
+        expect(args).toHaveLength(1);
+        const callback = args[0];
+        expect(callback).toBeInstanceOf(Function);
+        const callbackReturn = callback('atom://cmake-builder-provider-by-sporniket/main');
+        expect(callbackReturn).toBeInstanceOf('CmakeBuilderProviderMainViewClass');
+        expect(callback('whatever')).toBeUndefined();
     });
 });
 
