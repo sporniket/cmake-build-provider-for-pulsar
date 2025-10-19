@@ -9,16 +9,31 @@ A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
 
+let static_counter = 0
+
+// It seems that I MUST keep a cache of the targets for each working directories
+let static_targets = {}
+
 export function createCmakeBuilderProviderClass(globals, config) {
     return class CmakeBuilderProvider {
         #globals = globals;
         #config = config;
         #basedir;
         #niceName;
+        #instance_id;
         constructor(cwd) {
             console.log(`createCmakeBuilderProviderClass(${cwd})> construct`)
             this.#basedir = cwd;
-            this.#niceName = `${this.#config.niceName.prefix} '${this.#basedir}'`
+            this.#instance_id = static_counter++;
+            this.#niceName = `[${this.#instance_id}] ${this.#config.niceName.prefix} '${this.#basedir}'`
+            console.log(this.#niceName)
+            static_targets[this.#basedir]=[{
+                'exec': `echo "${this.#instance_id}"`,
+                'name': `${this.#basedir}`,
+                'args': [`CMake builders of '${this.#basedir}'`],
+                'sh': true,
+                'cwd': `${this.#basedir}`
+            }]
             // OPTIONAL: setup here
             // cwd is the project root this provider will operate in, so store `cwd` in `this`.
         }
@@ -45,14 +60,12 @@ export function createCmakeBuilderProviderClass(globals, config) {
 
         settings() {
             console.log(`createCmakeBuilderProviderClass(${this.#basedir})> settings()`)
+            let result = []
+            for(let t in static_targets) {
+                result = result.concat(static_targets[t])
+            }
             // REQUIRED: Return an array of objects which each define a build description.
-            return Promise.resolve([{
-                'exec': 'echo',
-                'name': `cmake:${this.#basedir}> echo`,
-                'args': [`CMake builders of '${this.#basedir}'`],
-                'sh': true,
-                'cwd': `${this.#basedir}`
-            }]); // [ { ... }, { ... }, ]
+            return Promise.resolve(result); // [ { ... }, { ... }, ]
         }
 
         on(event, cb) {
