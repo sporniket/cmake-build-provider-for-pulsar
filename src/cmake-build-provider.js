@@ -15,6 +15,7 @@ the community-led, hyper-hackable text editor..
 ****************************************/
 
 export let subscriptions = null;
+export let CmakeBuilderProviderClass = null;
 
 export default {
     activate(state, givenGlobals) {
@@ -28,6 +29,7 @@ export default {
         };
 
         console.log('CMake build provider activated.');
+        CmakeBuilderProviderClass = createCmakeBuilderProviderClass({}, {niceName: {prefix: 'CMake builders of'}});
         const mainViewClass = createCmakeBuilderProviderMainViewClass(globals, {});
         subscriptions = new CompositeDisposable(
             atom.workspace.addOpener((uri) => {
@@ -53,6 +55,9 @@ export default {
         atom.workspace.toggle('atom://cmake-builder-provider-by-sporniket/main');
     },
     // provided services entry points
-    provideBuilder() {return createCmakeBuilderProviderClass({}, {niceName: {prefix: 'CMake builders of'}});},
+    provideBuilder() {
+        console.log('CMake build provider> provideBuilder()');
+        return CmakeBuilderProviderClass;
+    },
     // consumed services entry points
 };
