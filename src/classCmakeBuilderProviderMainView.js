@@ -9,9 +9,9 @@ A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
 
-export function createCmakeBuilderProviderMainViewClass(globals, config) {
+export function createCmakeBuilderProviderMainViewClass(givenGlobals, config) {
     return class CmakeBuilderProviderMainView {
-        #globals = globals;
+        #globals = givenGlobals;
         #config = config;
         #element;
         #subscriptions;
@@ -20,15 +20,15 @@ export function createCmakeBuilderProviderMainViewClass(globals, config) {
             this.#element = this.#globals.document.createElement('div');
             this.#element.classList.add('cmake-builder-provider-by-sporniket-main');
 
-            const message = this.#globals.document.createElement('div');
-            message.textContent = 'The CmakeBuilderProviderMainView is here';
-            message.classList.add('message');
-            this.#element.appendChild(message);
+            const _message = this.#globals.document.createElement('div');
+            _message.textContent = 'The CmakeBuilderProviderMainView is here';
+            _message.classList.add('message');
+            this.#element.appendChild(_message);
 
             // TODO : change callback for something usefull.
             this.#subscriptions = this.#globals.atom.workspace.getCenter().observeActivePaneItem(item => {
                 if (!atom.workspace.isTextEditor(item)) {return;}
-                message.innerHTML = `
+                _message.innerHTML = `
         <h2>${item.getFileName() || 'untitled'}</h2>
         <ul>
           <li><b>Soft Wrap:</b> ${item.softWrapped}</li>
@@ -42,7 +42,7 @@ export function createCmakeBuilderProviderMainViewClass(globals, config) {
         }
 
         getTitle() {
-            return 'CMake builder provider &mdash; Status';
+            return 'CMake builder provider -- Status';
         }
 
         getElement() {

@@ -81,7 +81,7 @@ describe('Class CmakeBuilderProvider', () => {
         expect(workspaceCenter.observeActivePaneItem).toHaveBeenCalled();
     });
     test('It MUST have a title', () => {
-        expect(view.getTitle()).toBe('CMake builder provider &mdash; Status');
+        expect(view.getTitle()).toBe('CMake builder provider -- Status');
     });
     test('It MUST have an URI', () => {
         expect(view.getURI()).toBe('atom://cmake-builder-provider-by-sporniket/main');
