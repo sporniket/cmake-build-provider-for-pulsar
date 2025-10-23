@@ -41,7 +41,7 @@ export function createCmakeBuilderProviderClass(globals, config) {
         settings() {
             // REQUIRED: Return an array of objects which each define a build description.
             return [{
-                'cmd': 'echo',
+                'exec': 'echo',
                 'name': `cmake:${this.#basedir}> echo`,
                 'args': [`CMake builders of '${this.#basedir}'`],
                 'sh': true,

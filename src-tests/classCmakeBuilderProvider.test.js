@@ -21,7 +21,7 @@ describe('Class CmakeBuilderProvider', () => {
     });
     test('It MUST return a list of builds', () => {
         expect(provider.settings()).toStrictEqual([{
-            'cmd': 'echo',
+            'exec': 'echo',
             'name': 'cmake:whatever> echo',
             'args': ['CMake builders of \'whatever\''],
             'sh': true,
