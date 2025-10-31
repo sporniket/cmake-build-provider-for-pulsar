@@ -14,7 +14,6 @@ the community-led, hyper-hackable text editor..
 ****************************************/
 
 function assertRequiredMethodsOf(fixture) {
-    console.log(fixture);
     return () => {
         expect(fixture).toMatchObject({
             exists: expect.any(Function),
