@@ -41,9 +41,12 @@ describe('makeExistingFile() simulates an existing file', () => {
             expect(f.exists()).toBe(true);
         });
     });
+    test('A call to create() resolves to false', async () => {
+        await expect(makeExistingFile().create()).resolves.toBe(false);
+    });
 });
 
-describe('makeReadOnlyFile()', () => {
+describe('makeReadOnlyFile() simulates a read only existing file', () => {
     test('It has expected methods', assertRequiredMethodsOf(makeReadOnlyFile()));
     describe('A call to exists() always returns true', () => {
         let f = makeReadOnlyFile();
@@ -51,9 +54,12 @@ describe('makeReadOnlyFile()', () => {
             expect(f.exists()).toBe(true);
         });
     });
+    test('A call to create() resolves to false', async () => {
+        await expect(makeReadOnlyFile().create()).resolves.toBe(false);
+    });
 });
 
-describe('makeAbsentFile()', () => {
+describe('makeAbsentFile() simulates a non existing file that can be created', () => {
     test('It has expected methods', assertRequiredMethodsOf(makeAbsentFile()));
     describe('A call to exists() always returns false when create() has not been called', () => {
         let f = makeAbsentFile();
@@ -61,14 +67,20 @@ describe('makeAbsentFile()', () => {
             expect(f.exists()).toBe(false);
         });
     });
+    test('A call to create() resolves to true', async () => {
+        await expect(makeAbsentFile().create()).resolves.toBe(true);
+    });
 });
 
-describe('makeUncreatableFile()', () => {
+describe('makeUncreatableFile() simulates a non existing file that cannot be created', () => {
     test('It has expected methods', assertRequiredMethodsOf(makeUncreatableFile()));
     describe('A call to exists() always returns false when create() has not been called', () => {
-        let f = makeAbsentFile();
+        let f = makeUncreatableFile();
         repeatTestRandTimes(2, 20, () => {
             expect(f.exists()).toBe(false);
         });
+    });
+    test('A call to create() is rejected', async () => {
+        await expect(makeUncreatableFile().create()).rejects.toThrow();
     });
 });
