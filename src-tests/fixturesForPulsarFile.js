@@ -23,12 +23,12 @@ export function makeReadOnlyFile() {return {
     write: jest.fn(() => {return Promise.resolve(null);})
 };}
 export function makeAbsentFile() {return {
-    exists: jest.fn(() => {return true;}),
+    exists: jest.fn(() => {return false;}),
     create: jest.fn(() => {return Promise.resolve(false);}),
     write: jest.fn(() => {return Promise.resolve(null);})
 };}
 export function makeUncreatableFile() {return {
-    exists: jest.fn(() => {return true;}),
+    exists: jest.fn(() => {return false;}),
     create: jest.fn(() => {return Promise.resolve(false);}),
     write: jest.fn(() => {return Promise.resolve(null);})
 };}
