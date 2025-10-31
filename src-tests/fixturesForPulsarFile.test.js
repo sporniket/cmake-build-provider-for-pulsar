@@ -14,25 +14,28 @@ the community-led, hyper-hackable text editor..
 ****************************************/
 
 function assertRequiredMethodsOf(fixture) {
+    console.log(fixture);
     return () => {
-        test.each(['exists', 'create', 'write'])('%s', (m) => {
-            expect(fixture[m]).toBeInstanceOf(Function);
+        expect(fixture).toMatchObject({
+            exists: expect.any(Function),
+            create: expect.any(Function),
+            write: expect.any(Function)
         });
     };
 }
 
 describe('makeExistingFile()', () => {
-    describe('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
+    test('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
 });
 
 describe('makeReadOnlyFile()', () => {
-    describe('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
+    test('It has expected methods', assertRequiredMethodsOf(makeReadOnlyFile()));
 });
 
 describe('makeAbsentFile()', () => {
-    describe('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
+    test('It has expected methods', assertRequiredMethodsOf(makeAbsentFile()));
 });
 
 describe('makeUncreatableFile()', () => {
-    describe('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
+    test('It has expected methods', assertRequiredMethodsOf(makeUncreatableFile()));
 });
