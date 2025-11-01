@@ -39,16 +39,23 @@ const MockedFileCreation = Object.freeze(
 class MockedFile {
     #created;
     #fileMode;
-    #lastWrite;
+    exists;
+    create;
+    write;
+
     constructor(mockedFileCreation, mockedFileMode ) {
         this.#created = mockedFileCreation.isCreated;
         this.#fileMode = mockedFileMode;
-        this.#lastWrite = null;
+        this.exists = jest.fn(this.#exists);
+        this.create = jest.fn(this.#create);
+        this.write = jest.fn(this.#write);
     }
-    exists() {
+
+    #exists() {
         return this.#created;
     }
-    create() {
+
+    #create() {
         if (this.#created) {
             return this.#fileMode.onCreate(true);
         }
@@ -58,15 +65,12 @@ class MockedFile {
         this.#created = true;
         return this.#fileMode.onCreate(false);
     }
-    write(text) {
+
+    #write(text) {
         if (!this.#created && this.#fileMode === MockedFileMode.READ_WRITE) {
             this.#created = true; // implied creation
         }
-        this.#lastWrite = text;
         return this.#fileMode.onWrite(text);
-    }
-    getLastWrite() {
-        return this.#lastWrite;
     }
 }
 

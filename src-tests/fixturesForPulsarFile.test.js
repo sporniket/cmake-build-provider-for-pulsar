@@ -1,6 +1,4 @@
 'use strict';
-import {jest} from '@jest/globals';
-
 import {makeExistingFile, makeReadOnlyFile, makeAbsentFile, makeUncreatableFile} from './fixturesForPulsarFile.js';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
@@ -23,15 +21,6 @@ function assertRequiredMethodsOf(fixture) {
     };
 }
 
-function repeatTestRandTimes(minRep, maxRep, testFnToRepeat) {
-    let nbTimes = Math.floor(Math.random() * (maxRep - minRep)) + minRep;
-    for (let i = 0; i < nbTimes; i++) {
-        test(`attempt #${i}`, () => {
-            testFnToRepeat();
-        });
-    }
-}
-
 describe('==== makeExistingFile() simulates an existing file ====', () => {
     test('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
     describe('After instanciation', () => {
@@ -50,21 +39,20 @@ describe('==== makeExistingFile() simulates an existing file ====', () => {
                 return f.exists();
             })).resolves.toBe(true);
         });
-        test('getLastWrite() returns null', () => {
-            expect(makeExistingFile().getLastWrite()).toBeNull();
-        });
     });
     test('A call to create() resolves to false', async () => {
         await expect(makeExistingFile().create()).resolves.toBe(false);
     });
     describe('A call to write() resolves and is verifiable', () => {
-        const f = makeExistingFile();
-        const w = f.write('whatever');
         test('A call to write() resolves', async () => {
-            await expect(w).resolves.toBeTruthy();
+            const f = makeExistingFile();
+            await expect(f.write('whatever')).resolves.toBeTruthy();
         });
-        test('getLastWrite() returns "whatever"', () => {
-            expect(f.getLastWrite()).toBe('whatever');
+        test('write() has been called with "whatever"', async () => {
+            const f = makeExistingFile();
+            await expect(f.write('whatever')
+                .then(()=>{return f.write;})
+            ).resolves.toHaveBeenCalledWith('whatever');
         });
     });
 });
@@ -91,21 +79,25 @@ describe('==== makeReadOnlyFile() simulates a read only existing file ====', () 
                 return f.exists();
             })).resolves.toBe(true);
         });
-        test('getLastWrite() returns null', () => {
-            expect(makeReadOnlyFile().getLastWrite()).toBeNull();
-        });
     });
     test('A call to create() resolves to false', async () => {
         await expect(makeReadOnlyFile().create()).resolves.toBe(false);
     });
     describe('A call to write() is rejected and is verifiable', () => {
-        const f = makeReadOnlyFile();
-        const w = f.write('whatever');
         test('A call to write() is rejected', async () => {
-            await expect(w).rejects.toThrow();
+            const f = makeReadOnlyFile();
+            await expect(f.write('whatever')).rejects.toThrow();
         });
-        test('getLastWrite() returns "whatever"', () => {
-            expect(f.getLastWrite()).toBe('whatever');
+        test('write() has been called with "whatever"', async () => {
+            const f = makeReadOnlyFile();
+            await expect(f.write('whatever').then(
+                ()=>{
+                    throw new Error('Should not happen');
+                },
+                () => {
+                    return f.write;
+                })
+            ).resolves.toHaveBeenCalledWith('whatever');
         });
     });
 });
@@ -128,21 +120,20 @@ describe('==== makeAbsentFile() simulates a non existing file that can be create
                 return f.exists();
             })).resolves.toBe(true);
         });
-        test('getLastWrite() returns null', () => {
-            expect(makeAbsentFile().getLastWrite()).toBeNull();
-        });
     });
     test('A call to create() resolves to true', async () => {
         await expect(makeAbsentFile().create()).resolves.toBe(true);
     });
     describe('A call to write() resolves and is verifiable', () => {
-        const f = makeAbsentFile();
-        const w = f.write('whatever');
         test('A call to write() resolves', async () => {
-            await expect(w).resolves.toBeTruthy();
+            const f = makeAbsentFile();
+            await expect(f.write('whatever')).resolves.toBeTruthy();
         });
-        test('getLastWrite() returns "whatever"', () => {
-            expect(f.getLastWrite()).toBe('whatever');
+        test('write() has been called with "whatever"', async () => {
+            const f = makeAbsentFile();
+            expect(f.write('whatever')
+                .then(()=>{return f.write;})
+            ).resolves.toHaveBeenCalledWith('whatever');
         });
     });
 });
@@ -173,21 +164,25 @@ describe('==== makeUncreatableFile() simulates a non existing file that cannot b
                     return f.exists();
                 })).resolves.toBe(false);
         });
-        test('getLastWrite() returns null', () => {
-            expect(makeUncreatableFile().getLastWrite()).toBeNull();
-        });
     });
     test('A call to create() is rejected', async () => {
         await expect(makeUncreatableFile().create()).rejects.toThrow();
     });
     describe('A call to write() is rejected and is verifiable', () => {
-        const f = makeUncreatableFile();
-        const w = f.write('whatever');
         test('A call to write() is rejected', async () => {
-            await expect(w).rejects.toThrow();
+            const f = makeUncreatableFile();
+            await expect(f.write('whatever')).rejects.toThrow();
         });
-        test('getLastWrite() returns "whatever"', () => {
-            expect(f.getLastWrite()).toBe('whatever');
+        test('write() has been called with "whatever"', async () => {
+            const f = makeUncreatableFile();
+            await expect(f.write('whatever').then(
+                ()=>{
+                    throw new Error('Should not happen');
+                },
+                () => {
+                    return f.write;
+                })
+            ).resolves.toHaveBeenCalledWith('whatever');
         });
     });
 });
