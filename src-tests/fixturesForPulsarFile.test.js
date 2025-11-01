@@ -43,6 +43,19 @@ describe('makeExistingFile() simulates an existing file', () => {
     test('A call to create() resolves to false', async () => {
         await expect(makeExistingFile().create()).resolves.toBe(false);
     });
+    describe('A call to write() resolves and is verifiable', () => {
+        const f = makeExistingFile();
+        const w = f.write('whatever');
+        test('No last text written on creation', () => {
+            expect(makeExistingFile().getLastWrite()).toBeNull();
+        });
+        test('A call to write() resolves', async () => {
+            await expect(w).resolves.toBeTruthy();
+        });
+        test('We can get the text given to write()', () => {
+            expect(f.getLastWrite()).toBe('whatever');
+        });
+    });
 });
 
 describe('makeReadOnlyFile() simulates a read only existing file', () => {
@@ -56,6 +69,19 @@ describe('makeReadOnlyFile() simulates a read only existing file', () => {
     test('A call to create() resolves to false', async () => {
         await expect(makeReadOnlyFile().create()).resolves.toBe(false);
     });
+    describe('A call to write() is rejected and is verifiable', () => {
+        const f = makeReadOnlyFile();
+        const w = f.write('whatever');
+        test('No last text written on creation', () => {
+            expect(makeReadOnlyFile().getLastWrite()).toBeNull();
+        });
+        test('A call to write() is rejected', async () => {
+            await expect(w).rejects.toThrow();
+        });
+        test('We can get the text given to write()', () => {
+            expect(f.getLastWrite()).toBe('whatever');
+        });
+    });
 });
 
 describe('makeAbsentFile() simulates a non existing file that can be created', () => {
@@ -66,8 +92,31 @@ describe('makeAbsentFile() simulates a non existing file that can be created', (
             expect(f.exists()).toBe(false);
         });
     });
+    describe('A call to exists() always returns true when create() has been called', () => {
+        let f = makeAbsentFile();
+        f.create();
+        repeatTestRandTimes(2, 20, () => {
+            expect(f.exists()).toBe(true);
+        });
+    });
     test('A call to create() resolves to true', async () => {
         await expect(makeAbsentFile().create()).resolves.toBe(true);
+    });
+    describe('A call to write() resolves and is verifiable', () => {
+        const f = makeAbsentFile();
+        const w = f.write('whatever');
+        test('No last text written on creation', () => {
+            expect(makeExistingFile().getLastWrite()).toBeNull();
+        });
+        test('A call to write() resolves', async () => {
+            await expect(w).resolves.toBeTruthy();
+        });
+        test('We can get the text given to write()', () => {
+            expect(f.getLastWrite()).toBe('whatever');
+        });
+        test('The file exists after calling write()', () => {
+            expect(f.exists()).toBe(true);
+        });
     });
 });
 
@@ -79,7 +128,36 @@ describe('makeUncreatableFile() simulates a non existing file that cannot be cre
             expect(f.exists()).toBe(false);
         });
     });
+    test('A call to exists() after a call to create() returns false', async () => {
+        let f = makeUncreatableFile();
+        await expect(f.create()).rejects.toThrow();
+        f.create()
+            .then(
+                ()=>{
+                    throw new Error('Should not happen');
+                },
+                () => {
+                    expect(f.exists()).toBe(false);
+                }
+            );
+    });
     test('A call to create() is rejected', async () => {
         await expect(makeUncreatableFile().create()).rejects.toThrow();
+    });
+    describe('A call to write() is rejected and is verifiable', () => {
+        const f = makeUncreatableFile();
+        const w = f.write('whatever');
+        test('No last text written on creation', () => {
+            expect(makeReadOnlyFile().getLastWrite()).toBeNull();
+        });
+        test('A call to write() is rejected', async () => {
+            await expect(w).rejects.toThrow();
+        });
+        test('We can get the text given to write()', () => {
+            expect(f.getLastWrite()).toBe('whatever');
+        });
+        test('The file still absent after calling write()', () => {
+            expect(f.exists()).toBe(false);
+        });
     });
 });
