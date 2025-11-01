@@ -26,7 +26,7 @@ const workspaceCenter = {
 };
 
 const givenGlobals = {
-    atom: {
+    pulsar: {
         workspace: {
             toggle: jest.fn(),
             addOpener: jest.fn(),
@@ -51,8 +51,8 @@ describe('It MUST have an activate() method', () => {
     });
     test('cmakeBuildProvider.activate() add a valid opener', () => {
         dut({}, givenGlobals);
-        expect(givenGlobals.atom.workspace.addOpener).toHaveBeenCalledTimes(1);
-        const args = givenGlobals.atom.workspace.addOpener.mock.calls[0];
+        expect(givenGlobals.pulsar.workspace.addOpener).toHaveBeenCalledTimes(1);
+        const args = givenGlobals.pulsar.workspace.addOpener.mock.calls[0];
         expect(args).toHaveLength(1);
         const callback = args[0];
         expect(callback).toBeInstanceOf(Function);
@@ -81,7 +81,7 @@ describe('It MUST have a toggleMain() method', () => {
     });
     test('cmakeBuildProvider.toggleMain() calls atom.workspace.toggle()', () => {
         dut(givenGlobals);
-        expect(givenGlobals.atom.workspace.toggle).toHaveBeenCalledWith('atom://cmake-builder-provider-by-sporniket/main');
+        expect(givenGlobals.pulsar.workspace.toggle).toHaveBeenCalledWith('atom://cmake-builder-provider-by-sporniket/main');
     });
 });
 

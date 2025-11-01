@@ -26,7 +26,7 @@ export function createCmakeBuilderProviderMainViewClass(givenGlobals, config) {
             this.#element.appendChild(_message);
 
             // TODO : change callback for something usefull.
-            this.#subscriptions = this.#globals.atom.workspace.getCenter().observeActivePaneItem(item => {
+            this.#subscriptions = this.#globals.pulsar.workspace.getCenter().observeActivePaneItem(item => {
                 if (!atom.workspace.isTextEditor(item)) {return;}
                 _message.innerHTML = `
         <h2>${item.getFileName() || 'untitled'}</h2>

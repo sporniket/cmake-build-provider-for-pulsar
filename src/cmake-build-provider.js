@@ -18,7 +18,7 @@ export let subscriptions = null;
 
 function buildGlobals(givenGlobals) {
     return {
-        atom: givenGlobals?.atom || atom,
+        pulsar: givenGlobals?.pulsar || atom,
         document: givenGlobals?.document || document,
         log: givenGlobals?.log || console.log
     };
@@ -38,19 +38,19 @@ export default {
         _globals.log('CMake build provider activated.');
         const mainViewClass = createCmakeBuilderProviderMainViewClass(_globals, {});
         subscriptions = new CompositeDisposable(
-            _globals.atom.workspace.addOpener((uri) => {
+            _globals.pulsar.workspace.addOpener((uri) => {
                 if (uri === 'atom://cmake-builder-provider-by-sporniket/main') {
                     return new mainViewClass();
                 }
                 return null;
             }),
             // Register command that toggles this view
-            _globals.atom.commands.add('atom-workspace', {
+            _globals.pulsar.commands.add('atom-workspace', {
                 'cmake-build-provider-for-pulsar-by-sporniket:toggleMain': () => this.toggleMain()
             }),
 
             new Disposable(() => {
-                _globals.atom.workspace.getPaneItems().forEach((item) => {
+                _globals.pulsar.workspace.getPaneItems().forEach((item) => {
                     if (item instanceof mainViewClass) {
                         item.destroy();
                     }
@@ -73,7 +73,7 @@ export default {
     toggleMain(givenGlobals) {
         const _globals = buildGlobals(givenGlobals);
         _globals.log('CMake build provider toggleMain.');
-        _globals.atom.workspace.toggle('atom://cmake-builder-provider-by-sporniket/main');
+        _globals.pulsar.workspace.toggle('atom://cmake-builder-provider-by-sporniket/main');
     },
     // provided services entry points
     provideBuilder(givenGlobals) {

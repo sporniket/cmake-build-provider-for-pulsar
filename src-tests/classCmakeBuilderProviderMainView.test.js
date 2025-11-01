@@ -72,7 +72,7 @@ afterEach(() =>{
 
 
 describe('Class CmakeBuilderProvider', () => {
-    const mainViewClass = createCmakeBuilderProviderMainViewClass({atom, document, log: logger}, {});
+    const mainViewClass = createCmakeBuilderProviderMainViewClass({pulsar: atom, document, log: logger}, {});
     let view; // need to call the constructor in a test to have mocks properly setup.
     test('It MUST have a constructor preparing the view', () => {
         view = new mainViewClass({what: 'ever'});
