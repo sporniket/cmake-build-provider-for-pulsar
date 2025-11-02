@@ -30,8 +30,8 @@ function assertRequiredMethodsOf(fixture) {
 
 describe('==== makeExistingFile() simulates an existing file ====', () => {
     describe('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
-    describe('After instanciation', () => {
-        test('A call to exists() returns true', () => {
+    describe('Calling exists()', () => {
+        test('A call to exists() after instantiation returns true', () => {
             expect(makeExistingFile().exists()).toBe(true);
         });
         test('A call to exists() after write("whatever") returns true', async () => {
@@ -46,19 +46,32 @@ describe('==== makeExistingFile() simulates an existing file ====', () => {
                 return f.exists();
             })).resolves.toBe(true);
         });
+        test('It can be verified that exists() has been called', () => {
+            const f = makeExistingFile();
+            f.exists();
+            expect(f.exists).toHaveBeenCalled();
+        });
     });
-    test('A call to create() resolves to false', async () => {
-        await expect(makeExistingFile().create()).resolves.toBe(false);
+    describe('Calling create()', () => {
+        test('It resolves to false', async () => {
+            await expect(makeExistingFile().create()).resolves.toBe(false);
+        });
+        test('It can be verified that create() has been called', async () => {
+            const f = makeExistingFile();
+            await expect(f.create()
+                .then(() => {return f.create;})
+            ).resolves.toHaveBeenCalled();
+        });
     });
-    describe('A call to write() resolves and is verifiable', () => {
+    describe('Calling write("whatever")', () => {
         test('A call to write() resolves', async () => {
             const f = makeExistingFile();
             await expect(f.write('whatever')).resolves.toBeTruthy();
         });
-        test('write() has been called with "whatever"', async () => {
+        test('It can be verified that write() has been called with "whatever"', async () => {
             const f = makeExistingFile();
             await expect(f.write('whatever')
-                .then(()=>{return f.write;})
+                .then(() => {return f.write;})
             ).resolves.toHaveBeenCalledWith('whatever');
         });
     });
@@ -66,14 +79,14 @@ describe('==== makeExistingFile() simulates an existing file ====', () => {
 
 describe('==== makeReadOnlyFile() simulates a read only existing file ====', () => {
     describe('It has expected methods', assertRequiredMethodsOf(makeReadOnlyFile()));
-    describe('After instanciation', () => {
-        test('A call to exists() returns true', () => {
+    describe('Calling exists()', () => {
+        test('A call to exists() after instantiation returns true', () => {
             expect(makeReadOnlyFile().exists()).toBe(true);
         });
         test('A call to exists() after write("whatever") returns true', async () => {
             const f = makeReadOnlyFile();
             await expect(f.write('whatever').then(
-                ()=>{
+                () => {
                     throw new Error('Should not happen');
                 },
                 () => {
@@ -86,19 +99,32 @@ describe('==== makeReadOnlyFile() simulates a read only existing file ====', () 
                 return f.exists();
             })).resolves.toBe(true);
         });
+        test('It can be verified that exists() has been called', () => {
+            const f = makeReadOnlyFile();
+            f.exists();
+            expect(f.exists).toHaveBeenCalled();
+        });
     });
-    test('A call to create() resolves to false', async () => {
-        await expect(makeReadOnlyFile().create()).resolves.toBe(false);
+    describe('Calling create()', () => {
+        test('It resolves to false', async () => {
+            await expect(makeReadOnlyFile().create()).resolves.toBe(false);
+        });
+        test('It can be verified that create() has been called', async () => {
+            const f = makeReadOnlyFile();
+            await expect(f.create()
+                .then(() => {return f.create;})
+            ).resolves.toHaveBeenCalled();
+        });
     });
-    describe('A call to write() is rejected and is verifiable', () => {
+    describe('Calling write("whatever")', () => {
         test('A call to write() is rejected', async () => {
             const f = makeReadOnlyFile();
             await expect(f.write('whatever')).rejects.toThrow();
         });
-        test('write() has been called with "whatever"', async () => {
+        test('It can be verified that write() has been called with "whatever"', async () => {
             const f = makeReadOnlyFile();
             await expect(f.write('whatever').then(
-                ()=>{
+                () => {
                     throw new Error('Should not happen');
                 },
                 () => {
@@ -111,8 +137,8 @@ describe('==== makeReadOnlyFile() simulates a read only existing file ====', () 
 
 describe('==== makeAbsentFile() simulates a non existing file that can be created ====', () => {
     describe('It has expected methods', assertRequiredMethodsOf(makeAbsentFile()));
-    describe('After instanciation', () => {
-        test('A call to exists() returns false', () => {
+    describe('Calling exists()', () => {
+        test('A call to exists() after instantiation returns false', () => {
             expect(makeAbsentFile().exists()).toBe(false);
         });
         test('A call to exists() after write("whatever") returns true', async () => {
@@ -127,19 +153,32 @@ describe('==== makeAbsentFile() simulates a non existing file that can be create
                 return f.exists();
             })).resolves.toBe(true);
         });
+        test('It can be verified that exists() has been called', () => {
+            const f = makeAbsentFile();
+            f.exists();
+            expect(f.exists).toHaveBeenCalled();
+        });
     });
-    test('A call to create() resolves to true', async () => {
-        await expect(makeAbsentFile().create()).resolves.toBe(true);
+    describe('Calling create()', () => {
+        test('It resolves to true', async () => {
+            await expect(makeAbsentFile().create()).resolves.toBe(true);
+        });
+        test('It can be verified that create() has been called', async () => {
+            const f = makeAbsentFile();
+            await expect(f.create()
+                .then(() => {return f.create;})
+            ).resolves.toHaveBeenCalled();
+        });
     });
-    describe('A call to write() resolves and is verifiable', () => {
+    describe('Calling write("whatever")', () => {
         test('A call to write() resolves', async () => {
             const f = makeAbsentFile();
             await expect(f.write('whatever')).resolves.toBeTruthy();
         });
-        test('write() has been called with "whatever"', async () => {
+        test('It can be verified that write() has been called with "whatever"', async () => {
             const f = makeAbsentFile();
             expect(f.write('whatever')
-                .then(()=>{return f.write;})
+                .then(() => {return f.write;})
             ).resolves.toHaveBeenCalledWith('whatever');
         });
     });
@@ -147,14 +186,14 @@ describe('==== makeAbsentFile() simulates a non existing file that can be create
 
 describe('==== makeUncreatableFile() simulates a non existing file that cannot be created ====', () => {
     describe('It has expected methods', assertRequiredMethodsOf(makeUncreatableFile()));
-    describe('After instanciation', () => {
-        test('A call to exists() returns false', () => {
+    describe('Calling exists()', () => {
+        test('A call to exists() after instantiation returns false', () => {
             expect(makeUncreatableFile().exists()).toBe(false);
         });
         test('A call to exists() after write("whatever") returns false', async () => {
             const f = makeUncreatableFile();
             await expect(f.write('whatever').then(
-                ()=>{
+                () => {
                     throw new Error('Should not happen');
                 },
                 () => {
@@ -164,26 +203,45 @@ describe('==== makeUncreatableFile() simulates a non existing file that cannot b
         test('A call to exists() after create() returns false', async () => {
             const f = makeUncreatableFile();
             await expect(f.create().then(
-                ()=>{
+                () => {
                     throw new Error('Should not happen');
                 },
                 () => {
                     return f.exists();
                 })).resolves.toBe(false);
         });
+        test('It can be verified that exists() has been called', () => {
+            const f = makeUncreatableFile();
+            f.exists();
+            expect(f.exists).toHaveBeenCalled();
+        });
     });
-    test('A call to create() is rejected', async () => {
-        await expect(makeUncreatableFile().create()).rejects.toThrow();
+    describe('Calling create()', () => {
+        test('It is rejected', async () => {
+            await expect(makeUncreatableFile().create()).rejects.toThrow();
+        });
+        test('It can be verified that create() has been called', async () => {
+            const f = makeUncreatableFile();
+            await expect(f.create()
+                .then(
+                    () => {
+                        throw new Error('Should not happen');
+                    },
+                    () => {
+                        return f.create;
+                    })
+            ).resolves.toHaveBeenCalled();
+        });
     });
-    describe('A call to write() is rejected and is verifiable', () => {
+    describe('Calling write("whatever")', () => {
         test('A call to write() is rejected', async () => {
             const f = makeUncreatableFile();
             await expect(f.write('whatever')).rejects.toThrow();
         });
-        test('write() has been called with "whatever"', async () => {
+        test('It can be verified that write() has been called with "whatever"', async () => {
             const f = makeUncreatableFile();
             await expect(f.write('whatever').then(
-                ()=>{
+                () => {
                     throw new Error('Should not happen');
                 },
                 () => {
