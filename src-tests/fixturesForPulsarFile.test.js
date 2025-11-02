@@ -13,16 +13,23 @@ the community-led, hyper-hackable text editor..
 
 function assertRequiredMethodsOf(fixture) {
     return () => {
-        expect(fixture).toMatchObject({
-            exists: expect.any(Function),
-            create: expect.any(Function),
-            write: expect.any(Function)
+        test('It has methods `exists()`, `create()`, `write()`', () => {
+            expect(fixture).toMatchObject({
+                exists: expect.any(Function),
+                create: expect.any(Function),
+                write: expect.any(Function)
+            });
+        });
+        test('Methods `exists()`, `create()`, `write()` are mock functions', () => {
+            for (const method of ['exists', 'create', 'write']) {
+                expect(fixture[method]._isMockFunction).toBe(true);
+            }
         });
     };
 }
 
 describe('==== makeExistingFile() simulates an existing file ====', () => {
-    test('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
+    describe('It has expected methods', assertRequiredMethodsOf(makeExistingFile()));
     describe('After instanciation', () => {
         test('A call to exists() returns true', () => {
             expect(makeExistingFile().exists()).toBe(true);
@@ -58,7 +65,7 @@ describe('==== makeExistingFile() simulates an existing file ====', () => {
 });
 
 describe('==== makeReadOnlyFile() simulates a read only existing file ====', () => {
-    test('It has expected methods', assertRequiredMethodsOf(makeReadOnlyFile()));
+    describe('It has expected methods', assertRequiredMethodsOf(makeReadOnlyFile()));
     describe('After instanciation', () => {
         test('A call to exists() returns true', () => {
             expect(makeReadOnlyFile().exists()).toBe(true);
@@ -103,7 +110,7 @@ describe('==== makeReadOnlyFile() simulates a read only existing file ====', () 
 });
 
 describe('==== makeAbsentFile() simulates a non existing file that can be created ====', () => {
-    test('It has expected methods', assertRequiredMethodsOf(makeAbsentFile()));
+    describe('It has expected methods', assertRequiredMethodsOf(makeAbsentFile()));
     describe('After instanciation', () => {
         test('A call to exists() returns false', () => {
             expect(makeAbsentFile().exists()).toBe(false);
@@ -139,7 +146,7 @@ describe('==== makeAbsentFile() simulates a non existing file that can be create
 });
 
 describe('==== makeUncreatableFile() simulates a non existing file that cannot be created ====', () => {
-    test('It has expected methods', assertRequiredMethodsOf(makeUncreatableFile()));
+    describe('It has expected methods', assertRequiredMethodsOf(makeUncreatableFile()));
     describe('After instanciation', () => {
         test('A call to exists() returns false', () => {
             expect(makeUncreatableFile().exists()).toBe(false);
