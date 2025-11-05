@@ -1,6 +1,7 @@
 'use strict';
 import {createCmakeBuilderProviderClass} from './classCmakeBuilderProvider';
 import {createCmakeBuilderProviderMainViewClass} from './classCmakeBuilderProviderMainView';
+import {CmakeIntegrationEngine} from './classCmakeIntegrationEngine';
 import {CompositeDisposable, Disposable} from 'atom';
 // TODO -- import e.g. import { CompositeDisposable, Disposable} from 'atom';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
@@ -17,10 +18,14 @@ the community-led, hyper-hackable text editor..
 export let subscriptions = null;
 
 function buildGlobals(givenGlobals) {
-    return {
+    const jsGlobals = {
         pulsar: givenGlobals?.pulsar || atom,
         document: givenGlobals?.document || document,
         log: givenGlobals?.log || console.log
+    };
+    return {
+        engine: givenGlobals?.engine || new CmakeIntegrationEngine(jsGlobals),
+        ...jsGlobals
     };
 }
 
@@ -32,7 +37,7 @@ export default {
      * @param givenGlobals <b>UNOFFICIAL ARGUMENTS FOR TESTING</b> a way to inject atom, document, console.log,... ;
      * @see buildGlobals(givenGlobals)
      */
-    activate(state, givenGlobals) {
+    activate(state, givenGlobals, givenSettings) {
         const _globals = buildGlobals(givenGlobals);
 
         _globals.log('CMake build provider activated.');
@@ -57,6 +62,7 @@ export default {
                 });
             })
         );
+        return _globals.engine.initializeProjectState();
     },
     /**
      * Required extension point to stop the plugin.

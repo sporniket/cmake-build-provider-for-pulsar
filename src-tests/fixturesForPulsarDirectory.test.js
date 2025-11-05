@@ -1,5 +1,4 @@
 'use strict';
-import {jest} from '@jest/globals';
 
 import {makePopulatedDirectory, makePopulatedReadOnlyDirectory} from './fixturesForPulsarDirectory.js';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
