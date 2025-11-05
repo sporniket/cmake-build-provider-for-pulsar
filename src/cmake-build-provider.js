@@ -37,7 +37,7 @@ export default {
      * @param givenGlobals <b>UNOFFICIAL ARGUMENTS FOR TESTING</b> a way to inject atom, document, console.log,... ;
      * @see buildGlobals(givenGlobals)
      */
-    activate(state, givenGlobals, givenSettings) {
+    activate(state, givenGlobals) {
         const _globals = buildGlobals(givenGlobals);
 
         _globals.log('CMake build provider activated.');
