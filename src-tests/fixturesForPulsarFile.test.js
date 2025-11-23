@@ -13,15 +13,16 @@ the community-led, hyper-hackable text editor..
 
 function assertRequiredMethodsOf(fixture) {
     return () => {
-        test('It has methods `exists()`, `create()`, `write()`', () => {
+        test('It has methods `exists()`, `create()`, `read()`, `write()`', () => {
             expect(fixture).toMatchObject({
                 exists: expect.any(Function),
                 create: expect.any(Function),
+                read: expect.any(Function),
                 write: expect.any(Function)
             });
         });
-        test('Methods `exists()`, `create()`, `write()` are mock functions', () => {
-            for (const method of ['exists', 'create', 'write']) {
+        test('Methods `exists()`, `create()`, `read()`, `write()` are mock functions', () => {
+            for (const method of ['exists', 'create', 'read', 'write']) {
                 expect(fixture[method]._isMockFunction).toBe(true);
             }
         });
@@ -61,6 +62,24 @@ describe('==== makeExistingFile() simulates an existing file ====', () => {
             await expect(f.create()
                 .then(() => {return f.create;})
             ).resolves.toHaveBeenCalled();
+        });
+    });
+    describe('Calling read()', () => {
+        test('A call to read() after makeExistingFile() returns ""', async() => {
+            const f = makeExistingFile();
+            expect(f.read()).resolves.toBe('');
+        });
+        test('A call to read() after makeExistingFile({onRead:"whatever"}) returns "whatever"', async() => {
+            const f = makeExistingFile({onRead: 'whatever'});
+            expect(f.read()).resolves.toBe('whatever');
+        });
+        test('A call to read() after let f = makeExistingFile() ; f.write("whatever") returns "whatever"', async() => {
+            const f = makeExistingFile();
+            expect(f.write('whatever').then(()=>f.read())).resolves.toBe('whatever');
+        });
+        test('It can be verified that read() has been called', () => {
+            const f = makeExistingFile();
+            expect(f.read().then(() => f.read)).resolves.toHaveBeenCalled();
         });
     });
     describe('Calling write("whatever")', () => {
@@ -116,6 +135,29 @@ describe('==== makeReadOnlyFile() simulates a read only existing file ====', () 
             ).resolves.toHaveBeenCalled();
         });
     });
+    describe('Calling read()', () => {
+        test('A call to read() after makeReadOnlyFile() returns ""', async() => {
+            const f = makeReadOnlyFile();
+            expect(f.read()).resolves.toBe('');
+        });
+        test('A call to read() after makeReadOnlyFile({onRead:"whatever"}) returns "whatever"', async() => {
+            const f = makeReadOnlyFile({onRead: 'whatever'});
+            expect(f.read()).resolves.toBe('whatever');
+        });
+        test('A call to read() after let f = makeReadOnlyFile() ; try{f.write("whatever")}catch(error){} returns ""', async() => {
+            const f = makeReadOnlyFile();
+            expect(f.write('whatever').then(
+                ()=>{
+                    throw new Error('Should not happen');
+                },
+                ()=>f.read())
+            ).resolves.toBe('');
+        });
+        test('It can be verified that read() has been called', () => {
+            const f = makeReadOnlyFile();
+            expect(f.read().then(() => f.read)).resolves.toHaveBeenCalled();
+        });
+    });
     describe('Calling write("whatever")', () => {
         test('A call to write() is rejected', async () => {
             const f = makeReadOnlyFile();
@@ -168,6 +210,25 @@ describe('==== makeAbsentFile() simulates a non existing file that can be create
             await expect(f.create()
                 .then(() => {return f.create;})
             ).resolves.toHaveBeenCalled();
+        });
+    });
+    describe('Calling read()', () => {
+        test('A call to read() after makeAbsentFile() is rejected', async() => {
+            const f = makeAbsentFile();
+            expect(f.read()).rejects.toThrow();
+        });
+        test('A call to read() after let f = makeAbsentFile() ; f.write("whatever") returns "whatever"', async() => {
+            const f = makeAbsentFile();
+            expect(f.write('whatever').then(()=>f.read())).resolves.toBe('whatever');
+        });
+        test('It can be verified that read() has been called', () => {
+            const f = makeAbsentFile();
+            expect(f.read().then(
+                () => {
+                    throw new Error('Should not happen');
+                },
+                () => f.read
+            )).resolves.toHaveBeenCalled();
         });
     });
     describe('Calling write("whatever")', () => {
@@ -231,6 +292,30 @@ describe('==== makeUncreatableFile() simulates a non existing file that cannot b
                         return f.create;
                     })
             ).resolves.toHaveBeenCalled();
+        });
+    });
+    describe('Calling read()', () => {
+        test('A call to read() after makeUncreatableFile() is rejected', async() => {
+            const f = makeUncreatableFile();
+            expect(f.read()).rejects.toThrow();
+        });
+        test('A call to read() after let f = makeUncreatableFile() ; try{f.write("whatever")}catch(error){} is rejected', async() => {
+            const f = makeUncreatableFile();
+            expect(f.write('whatever').then(
+                ()=>{
+                    throw new Error('Should not happen');
+                },
+                ()=>f.read())
+            ).rejects.toThrow();
+        });
+        test('It can be verified that read() has been called', () => {
+            const f = makeUncreatableFile();
+            expect(f.read().then(
+                () => {
+                    throw new Error('Should not happen');
+                },
+                () => f.read
+            )).resolves.toHaveBeenCalled();
         });
     });
     describe('Calling write("whatever")', () => {

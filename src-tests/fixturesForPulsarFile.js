@@ -39,15 +39,19 @@ const MockedFileCreation = Object.freeze(
 class MockedFile {
     #created;
     #fileMode;
+    #onRead;
     exists;
     create;
+    read;
     write;
 
-    constructor(mockedFileCreation, mockedFileMode ) {
+    constructor({mockedFileCreation, mockedFileMode, onRead = ''} ) {
         this.#created = mockedFileCreation.isCreated;
         this.#fileMode = mockedFileMode;
+        this.#onRead = onRead;
         this.exists = jest.fn(this.#exists);
         this.create = jest.fn(this.#create);
+        this.read = jest.fn(this.#read);
         this.write = jest.fn(this.#write);
     }
 
@@ -66,15 +70,53 @@ class MockedFile {
         return this.#fileMode.onCreate(false);
     }
 
+    #read() {
+        if (typeof this.#onRead === 'string' || this.#onRead instanceof String)
+        {
+            return Promise.resolve(this.#onRead);
+        }
+        else if (this.#onRead instanceof Error) {
+            return Promise.reject(this.#onRead);
+        }
+        throw new Error('wrong.initialization:' + typeof (this.#onRead));
+    }
+
     #write(text) {
-        if (!this.#created && this.#fileMode === MockedFileMode.READ_WRITE) {
-            this.#created = true; // implied creation
+        if (this.#fileMode === MockedFileMode.READ_WRITE) {
+            if (!this.#created) {
+                this.#created = true; // implied creation
+            }
+            this.#onRead = text;
         }
         return this.#fileMode.onWrite(text);
     }
 }
 
-export function makeExistingFile() {return new MockedFile(MockedFileCreation.EXISTING, MockedFileMode.READ_WRITE);}
-export function makeReadOnlyFile() {return new MockedFile(MockedFileCreation.EXISTING, MockedFileMode.READ_ONLY);}
-export function makeAbsentFile() {return new MockedFile(MockedFileCreation.ABSENT, MockedFileMode.READ_WRITE);}
-export function makeUncreatableFile() {return new MockedFile(MockedFileCreation.ABSENT, MockedFileMode.READ_ONLY);}
+export function makeExistingFile({onRead} = {onRead: ''}) {
+    return new MockedFile({
+        onRead,
+        mockedFileCreation: MockedFileCreation.EXISTING,
+        mockedFileMode: MockedFileMode.READ_WRITE
+    } );
+}
+export function makeReadOnlyFile({onRead} = {onRead: ''}) {
+    return new MockedFile({
+        onRead,
+        mockedFileCreation: MockedFileCreation.EXISTING,
+        mockedFileMode: MockedFileMode.READ_ONLY
+    });
+}
+export function makeAbsentFile() {
+    return new MockedFile({
+        onRead: new Error('cannot.read'),
+        mockedFileCreation: MockedFileCreation.ABSENT,
+        mockedFileMode: MockedFileMode.READ_WRITE
+    });
+}
+export function makeUncreatableFile() {
+    return new MockedFile({
+        onRead: new Error('cannot.read'),
+        mockedFileCreation: MockedFileCreation.ABSENT,
+        mockedFileMode: MockedFileMode.READ_ONLY
+    });
+}
