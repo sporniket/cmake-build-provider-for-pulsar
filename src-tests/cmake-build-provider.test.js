@@ -204,7 +204,7 @@ describe('==== cmake-build-provider is a plugin for Pulsar (https://pulsar-edit.
     });
     describe('== Calling toggleMain() ==', () => {
         const dut = cmakeBuildProvider.toggleMain;
-        test('cmakeBuildProvider.toggleMain() calls pulsar.workspace.toggle()', () => {
+        test('It calls pulsar.workspace.toggle()', () => {
             dut(givenGlobals);
             expect(givenGlobals.pulsar.workspace.toggle).toHaveBeenCalledWith('atom://cmake-builder-provider-by-sporniket/main');
         });
@@ -218,7 +218,6 @@ describe('==== cmake-build-provider provides the service "builder v2" ====', () 
         });
     });
     describe('== Calling provideBuilder() ==', () => {
-        const dut = cmakeBuildProvider.provideBuilder;
         test('It returns a class that can be instanciated', () => {
             const providerClass = cmakeBuildProvider.provideBuilder(givenGlobals);
             expect(new providerClass('my_path').getNiceName()).toBe('CMake builders of \'my_path\'');
