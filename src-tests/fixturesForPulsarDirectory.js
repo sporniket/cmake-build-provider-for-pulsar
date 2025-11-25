@@ -12,6 +12,10 @@ This is part of **cmake-build-provider-for-pulsar-by-sporniket**.
 A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
+function isString(v) {
+    return (typeof v === 'string' || v instanceof String);
+}
+
 const MockedFileMode = Object.freeze(
     {
         READ_WRITE: {
@@ -31,13 +35,18 @@ class MockedDirectory {
     #fileMode;
     getPath;
     getFile;
-    constructor(pathToDir, relativePathOfExistingFiles, fileMode) {
+    constructor(pathToDir, fileSpecifications, fileMode) {
         this.#path = pathToDir;
         this.#files = new Map();
         this.#fileMode = fileMode;
-        if (!!relativePathOfExistingFiles && Array.isArray(relativePathOfExistingFiles)) {
-            for (let path of relativePathOfExistingFiles) {
-                this.#files.set(path, this.#fileMode.newExistingFile());
+        if (!!fileSpecifications && Array.isArray(fileSpecifications)) {
+            for (let spec of fileSpecifications) {
+                if (isString(spec)) {
+                    this.#files.set(spec, this.#fileMode.newExistingFile());
+                } else {
+                    const {path, file} = spec;
+                    this.#files.set(path, file);
+                }
             }
         }
         this.getPath = jest.fn(this.#getPath);
@@ -56,10 +65,10 @@ class MockedDirectory {
     }
 }
 
-export function makePopulatedDirectory(pathToDir, relativePathOfExistingFiles) {
-    return new MockedDirectory(pathToDir, relativePathOfExistingFiles, MockedFileMode.READ_WRITE);
+export function makePopulatedDirectory(pathToDir, fileSpecifications) {
+    return new MockedDirectory(pathToDir, fileSpecifications, MockedFileMode.READ_WRITE);
 }
 
-export function makePopulatedReadOnlyDirectory(pathToDir, relativePathOfExistingFiles) {
-    return new MockedDirectory(pathToDir, relativePathOfExistingFiles, MockedFileMode.READ_ONLY);
+export function makePopulatedReadOnlyDirectory(pathToDir, fileSpecifications) {
+    return new MockedDirectory(pathToDir, fileSpecifications, MockedFileMode.READ_ONLY);
 }

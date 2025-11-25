@@ -1,6 +1,7 @@
 'use strict';
 
 import {makePopulatedDirectory, makePopulatedReadOnlyDirectory} from './fixturesForPulsarDirectory.js';
+import {makeExistingFile, makeReadOnlyFile, makeUncreatableFile} from './fixturesForPulsarFile.js';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
 
@@ -11,6 +12,23 @@ This is part of **cmake-build-provider-for-pulsar-by-sporniket**.
 A build provider to maintain a list of cmake targets, for Pulsar,
 the community-led, hyper-hackable text editor..
 ****************************************/
+async function expectFileToBeAnExistingWritableFile(file, initialContent, contentToWrite) {
+    expect(file.exists()).toBe(true);
+    expect(file.read()).resolves.toBe(initialContent);
+    await expect(file
+        .write(contentToWrite)
+        .then(() => {return file.read();})
+    ).resolves.toBe(contentToWrite);
+}
+async function expectFileToBeAnExistingReadOnlyFile(file, initialContent, contentToWrite) {
+    expect(file.exists()).toBe(true);
+    expect(file.read()).resolves.toBe(initialContent);
+    await expect(file.write(contentToWrite)).rejects.toThrow();
+}
+async function expectFileToBeANonExistingNonCreatableFile(file) {
+    expect(file.exists()).toBe(false);
+    await expect(file.create()).rejects.toThrow();
+}
 
 describe('==== makePopulatedDirectory() simulates a Directory with some files presents ====', () => {
     describe('It has expected methods', () => {
@@ -57,7 +75,23 @@ describe('==== makePopulatedDirectory() simulates a Directory with some files pr
                     expect(file[method]._isMockFunction).toBe(true);
                 }
             });
+            test('It returns the fixtures that were given at instanciation', async() => {
+                const directory = makePopulatedDirectory(
+                    'path',
+                    [
+                        {path: 'empty_file', file: makeExistingFile() },
+                        {path: 'file_with_content', file: makeExistingFile({onRead: 'whatever 1'})},
+                        {path: 'file_read_only', file: makeReadOnlyFile({onRead: 'whatever 2'})},
+                        {path: 'file_uncreatable', file: makeUncreatableFile()}
+                    ]
+                );
 
+                // Verify
+                await expectFileToBeAnExistingWritableFile(directory.getFile('empty_file'), '', 'to be written');
+                await expectFileToBeAnExistingWritableFile(directory.getFile('file_with_content'), 'whatever 1', 'to be written');
+                await expectFileToBeAnExistingReadOnlyFile(directory.getFile('file_read_only'), 'whatever 2', 'to be written');
+                await expectFileToBeANonExistingNonCreatableFile(directory.getFile('file_uncreatable'));
+            });
         });
         describe('It is idempotent', () => {
             test('getFile("a") gives the same result than getFile("a")', () => {
@@ -98,7 +132,6 @@ describe('==== makePopulatedDirectory() simulates a Directory with some files pr
                 await expect(dir.getFile('a').write('whatever')).resolves.toBeTruthy();
             });
         });
-
     });
 
 });
@@ -149,7 +182,23 @@ describe('==== makePopulatedReadOnlyDirectory() simulates a read only Directory 
                     expect(file[method]._isMockFunction).toBe(true);
                 }
             });
+            test('It returns the fixtures that were given at instanciation', async() => {
+                const directory = makePopulatedReadOnlyDirectory(
+                    'path',
+                    [
+                        {path: 'empty_file', file: makeExistingFile() },
+                        {path: 'file_with_content', file: makeExistingFile({onRead: 'whatever 1'})},
+                        {path: 'file_read_only', file: makeReadOnlyFile({onRead: 'whatever 2'})},
+                        {path: 'file_uncreatable', file: makeUncreatableFile()}
+                    ]
+                );
 
+                // Verify
+                await expectFileToBeAnExistingWritableFile(directory.getFile('empty_file'), '', 'to be written');
+                await expectFileToBeAnExistingWritableFile(directory.getFile('file_with_content'), 'whatever 1', 'to be written');
+                await expectFileToBeAnExistingReadOnlyFile(directory.getFile('file_read_only'), 'whatever 2', 'to be written');
+                await expectFileToBeANonExistingNonCreatableFile(directory.getFile('file_uncreatable'));
+            });
         });
         describe('It is idempotent', () => {
             test('getFile("a") gives the same result than getFile("a")', () => {
@@ -190,7 +239,6 @@ describe('==== makePopulatedReadOnlyDirectory() simulates a read only Directory 
                 await expect(dir.getFile('a').write('whatever')).rejects.toThrow();
             });
         });
-
     });
 
 });
