@@ -62,7 +62,7 @@ export default {
                 });
             })
         );
-        return _globals.engine.initializeProjectState();
+        return _globals.engine.asyncInitializeState();
     },
     /**
      * Required extension point to stop the plugin.

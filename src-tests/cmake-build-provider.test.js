@@ -6,6 +6,7 @@ import cmakeBuildProvider from '../src/cmake-build-provider';
 import {CmakeIntegrationEngine} from '../src/classCmakeIntegrationEngine';
 
 import {makePopulatedDirectory, makePopulatedReadOnlyDirectory} from './fixturesForPulsarDirectory.js';
+import {makeExistingFile} from './fixturesForPulsarFile.js';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
 
@@ -27,31 +28,34 @@ const workspaceCenter = {
     observeActivePaneItem: jest.fn(() => { return makeSubscription();})
 };
 
-const jsGlobals = {
-    pulsar: {
-        workspace: {
-            toggle: jest.fn(),
-            addOpener: jest.fn(),
-            getCenter: jest.fn(() => {return workspaceCenter;} )
-        },
-        commands: {
-            add: jest.fn()
-        },
-        project: {
-            getDirectories: jest.fn(() => [])
-        },
-        config: {
-            get: jest.fn()
-        }
-    },
-    document: documentMock,
-    log: jest.fn(),
-};
+let givenGlobals;
 
-const givenGlobals = {
-    engine: new CmakeIntegrationEngine(jsGlobals),
-    ...jsGlobals
-};
+beforeEach(() => {
+    const jsGlobals = {
+        pulsar: {
+            workspace: {
+                toggle: jest.fn(),
+                addOpener: jest.fn(),
+                getCenter: jest.fn(() => {return workspaceCenter;} )
+            },
+            commands: {
+                add: jest.fn()
+            },
+            project: {
+                getDirectories: jest.fn(() => [])
+            },
+            config: {
+                get: jest.fn()
+            }
+        },
+        document: documentMock,
+        log: jest.fn(),
+    };
+    givenGlobals = {
+        engine: new CmakeIntegrationEngine(jsGlobals),
+        ...jsGlobals
+    };
+});
 
 describe('==== cmake-build-provider is a plugin for Pulsar (https://pulsar-edit.dev/) ====', () => {
     describe('== It has expected methods ==', () => {
@@ -96,19 +100,34 @@ describe('==== cmake-build-provider is a plugin for Pulsar (https://pulsar-edit.
                     },
                     'configurePresets': [
                         {
-                            'what': 'ever'
-                        },
-                        {
-                            'never': 'mind'
+                            'name': 'whatever'
                         }
                     ]
                 }, null, 4)
             };
-            const givenDirectoryNotCmakeProject = makePopulatedDirectory('/home/not-a-cmake-project');
-            const givenDirectoryCmakeProjectWithoutPresets = makePopulatedDirectory('/home/cmake-project-without-preset', ['CMakeLists.txt']);
-            const givenReadOnlyDirectoryCmakeProjectWithoutPresets = makePopulatedReadOnlyDirectory('/home/cmake-project-immutable-without-preset', ['CMakeLists.txt']);
-            const givenDirectoryCmakeProjectWithSharedPresets = makePopulatedDirectory('/home/cmake-project/with-shared-presets', ['CMakeLists.txt', 'CMakePresets.json']);
-            const givenDirectoryCmakeProjectWithLocalPresets = makePopulatedDirectory('/home/cmake-project/with-local-presets', ['CMakeLists.txt', 'CMakeUserPresets.json']);
+            const givenDirectoryNotCmakeProject = makePopulatedDirectory(
+                '/home/not-a-cmake-project'
+            );
+            const givenDirectoryCmakeProjectWithoutPresets = makePopulatedDirectory(
+                '/home/cmake-project-without-preset', ['CMakeLists.txt']
+            );
+            const givenReadOnlyDirectoryCmakeProjectWithoutPresets = makePopulatedReadOnlyDirectory(
+                '/home/cmake-project-immutable-without-preset', ['CMakeLists.txt']
+            );
+            const givenDirectoryCmakeProjectWithSharedPresets = makePopulatedDirectory(
+                '/home/cmake-project/with-shared-presets',
+                [
+                    'CMakeLists.txt',
+                    {path: 'CMakePresets.json', file: makeExistingFile({onRead: givenSettings['cmake-build-provider-for-pulsar-by-sporniket.default-preset-body']})}
+                ]
+            );
+            const givenDirectoryCmakeProjectWithLocalPresets = makePopulatedDirectory(
+                '/home/cmake-project/with-local-presets',
+                [
+                    'CMakeLists.txt',
+                    {path: 'CMakeUserPresets.json', file: makeExistingFile({onRead: givenSettings['cmake-build-provider-for-pulsar-by-sporniket.default-preset-body']})}
+                ]
+            );
 
             givenGlobals.pulsar.project.getDirectories.mockImplementation(() => {
                 return [
@@ -159,40 +178,517 @@ describe('==== cmake-build-provider is a plugin for Pulsar (https://pulsar-edit.
             ]) {
                 expect(dir.getFile('CMakePresets.json').write).toHaveBeenCalledWith(givenSettings['cmake-build-provider-for-pulsar-by-sporniket.default-preset-body']);
             }
-            expect(givenGlobals.engine.state).toEqual(new Map(
-                [
-                    ['/home/not-a-cmake-project', {
-                        directory: givenDirectoryNotCmakeProject,
-                        isCmakeProject: false
-                    }],
-                    ['/home/cmake-project-without-preset', {
-                        directory: givenDirectoryCmakeProjectWithoutPresets,
-                        isCmakeProject: true,
-                        isLanguageCppOrC: true,
-                    }],
-                    ['/home/cmake-project-immutable-without-preset', {
-                        directory: givenReadOnlyDirectoryCmakeProjectWithoutPresets,
-                        isCmakeProject: true,
-                        isLanguageCppOrC: true,
-                        errors: [
-                            'cannot.create.preset:CMakePresets.json'
-                        ]
-                    }],
-                    ['/home/cmake-project/with-shared-presets', {
-                        directory: givenDirectoryCmakeProjectWithSharedPresets,
-                        isCmakeProject: true,
-                        isLanguageCppOrC: true,
-                    }],
-                    ['/home/cmake-project/with-local-presets', {
-                        directory: givenDirectoryCmakeProjectWithLocalPresets,
-                        isCmakeProject: true,
-                        isLanguageCppOrC: true,
-                    }]
+            expect(givenGlobals.engine.state.keys().toArray()).toEqual([
+                '/home/not-a-cmake-project',
+                '/home/cmake-project-without-preset',
+                '/home/cmake-project-immutable-without-preset',
+                '/home/cmake-project/with-shared-presets',
+                '/home/cmake-project/with-local-presets'
+            ]);
+            expect(givenGlobals.engine.state.get('/home/not-a-cmake-project')).toEqual({
+                directory: givenDirectoryNotCmakeProject,
+                isCmakeProject: false,
+                errors: [],
+                warnings: [],
+            });
+            expect(givenGlobals.engine.state.get('/home/cmake-project-without-preset')).toEqual({
+                directory: givenDirectoryCmakeProjectWithoutPresets,
+                isCmakeProject: true,
+                isLanguageCppOrC: true,
+                errors: [],
+                warnings: [],
+                selectedCmakePreset: {
+                    registry: 'public',
+                    id: 'whatever'
+                },
+                cmakePresets: {
+                    public: {
+                        order: [
+                            'whatever'
+                        ],
+                        registry: new Map([
+                            ['whatever', {
+                                name: 'whatever'
+                            }]
+                        ])
+                    },
+                    private: {
+                        order: [],
+                        registry: new Map()
+                    },
+                },
+            });
+            expect(givenGlobals.engine.state.get('/home/cmake-project-immutable-without-preset')).toEqual({
+                directory: givenReadOnlyDirectoryCmakeProjectWithoutPresets,
+                isCmakeProject: true,
+                isLanguageCppOrC: true,
+                warnings: [],
+                errors: [
+                    'cannot.create.preset:CMakePresets.json',
+                    'no.preset.after.load',
+                ],
+                selectedCmakePreset: {},
+                cmakePresets: {
+                    public: {
+                        order: [],
+                        registry: new Map()
+                    },
+                    private: {
+                        order: [],
+                        registry: new Map()
+                    },
+                },
+            });
+            expect(givenGlobals.engine.state.get('/home/cmake-project/with-shared-presets')).toEqual({
+                directory: givenDirectoryCmakeProjectWithSharedPresets,
+                isCmakeProject: true,
+                isLanguageCppOrC: true,
+                errors: [],
+                warnings: [],
+                selectedCmakePreset: {
+                    registry: 'public',
+                    id: 'whatever'
+                },
+                cmakePresets: {
+                    public: {
+                        order: ['whatever'],
+                        registry: new Map([
+                            ['whatever', {
+                                name: 'whatever'
+                            }]
+                        ])
+                    },
+                    private: {
+                        order: [],
+                        registry: new Map()
+                    },
+                },
+            });
+            expect(givenGlobals.engine.state.get('/home/cmake-project/with-local-presets')).toEqual({
+                directory: givenDirectoryCmakeProjectWithLocalPresets,
+                isCmakeProject: true,
+                isLanguageCppOrC: true,
+                errors: [],
+                warnings: [],
+                selectedCmakePreset: {
+                    registry: 'private',
+                    id: 'whatever'
+                },
+                cmakePresets: {
+                    public: {
+                        order: [],
+                        registry: new Map()
+                    },
+                    private: {
+                        order: ['whatever'],
+                        registry: new Map([
+                            ['whatever', {
+                                name: 'whatever'
+                            }]
+                        ])
+                    },
+                },
+            });
+
+        });
+        describe('It loads the preset files of each project', () => {
+            const givenPrivatePresetBody = JSON.stringify({
+                'version': 8,
+                'cmakeMinimumRequired': {
+                    'major': 3,
+                    'minor': 28,
+                    'patch': 0
+                },
+                'configurePresets': [
+                    {
+                        'name': 'a',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/...',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    },
+                    {
+                        'name': 'b',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/...',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    },
+                    {
+                        'name': 'c',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/...',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    }
                 ]
+            });
 
-            )
-            );
+            const givenSharedPresetBody = JSON.stringify({
+                'version': 8,
+                'cmakeMinimumRequired': {
+                    'major': 3,
+                    'minor': 28,
+                    'patch': 0
+                },
+                'configurePresets': [
+                    {
+                        'name': 'd',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/...',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    },
+                    {
+                        'name': 'e',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/...',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    },
+                    {
+                        'name': 'f',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/...',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    }
+                ]
+            });
 
+            const givenPresetBodyWithNoPresets = JSON.stringify({
+                'version': 8,
+                'cmakeMinimumRequired': {
+                    'major': 3,
+                    'minor': 28,
+                    'patch': 0
+                },
+                'configurePresets': []
+            });
+
+            test('It load both private and shared presets, in separate spaces, and the first public preset is selected', async() => {
+                // Prepare
+                const givenCmakeProject = makePopulatedDirectory(
+                    '/home/cmake-project/with-presets',
+                    [
+                        'CMakeLists.txt',
+                        {path: 'CMakePresets.json', file: makeExistingFile({onRead: givenSharedPresetBody})},
+                        {path: 'CMakeUserPresets.json', file: makeExistingFile({onRead: givenPrivatePresetBody})}
+                    ]
+                );
+                givenGlobals.pulsar.project.getDirectories.mockImplementation(() => {
+                    return [
+                        givenCmakeProject
+                    ];
+                });
+                givenGlobals.pulsar.config.get.mockImplementation(() => {
+                    return '';
+                });
+
+                // Execute
+                await dut({}, givenGlobals);
+
+                // Verify
+                expect(givenGlobals.engine.state).toEqual(new Map([
+                    [
+                        '/home/cmake-project/with-presets',
+                        {
+                            'directory': givenCmakeProject,
+                            'isCmakeProject': true,
+                            'isLanguageCppOrC': true,
+                            'errors': [],
+                            'warnings': [],
+                            'selectedCmakePreset': {
+                                'registry': 'public',
+                                'id': 'd'
+                            },
+                            'cmakePresets': {
+                                'private': {
+                                    'order': [
+                                        'a',
+                                        'b',
+                                        'c'
+                                    ],
+                                    'registry': new Map([
+                                        ['a', {
+                                            'name': 'a',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['b', {
+                                            'name': 'b',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['c', {
+                                            'name': 'c',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }]
+                                    ])
+                                },
+                                'public': {
+                                    'order': [
+                                        'd',
+                                        'e',
+                                        'f'
+                                    ],
+                                    'registry': new Map([
+                                        ['d', {
+                                            'name': 'd',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['e', {
+                                            'name': 'e',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['f', {
+                                            'name': 'f',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }]
+                                    ])
+                                }
+                            },
+                        }
+                    ]
+                ])
+                );
+            });
+            test('When there are only private presets, the first private preset is selected', async () => {
+                // Prepare
+                const givenCmakeProject = makePopulatedDirectory(
+                    '/home/cmake-project/with-presets',
+                    [
+                        'CMakeLists.txt',
+                        {path: 'CMakeUserPresets.json', file: makeExistingFile({onRead: givenPrivatePresetBody})}
+                    ]
+                );
+                givenGlobals.pulsar.project.getDirectories.mockImplementation(() => {
+                    return [
+                        givenCmakeProject
+                    ];
+                });
+                givenGlobals.pulsar.config.get.mockImplementation(() => {
+                    return '';
+                });
+
+                // Execute
+                await dut({}, givenGlobals);
+
+                // Verify
+                expect(givenGlobals.engine.state).toEqual(new Map([
+                    [
+                        '/home/cmake-project/with-presets',
+                        {
+                            'directory': givenCmakeProject,
+                            'isCmakeProject': true,
+                            'isLanguageCppOrC': true,
+                            'errors': [],
+                            'warnings': [],
+                            'selectedCmakePreset': {
+                                'registry': 'private',
+                                'id': 'a'
+                            },
+                            'cmakePresets': {
+                                'private': {
+                                    'order': [
+                                        'a',
+                                        'b',
+                                        'c'
+                                    ],
+                                    'registry': new Map([
+                                        ['a', {
+                                            'name': 'a',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['b', {
+                                            'name': 'b',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['c', {
+                                            'name': 'c',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }]
+                                    ])
+                                },
+                                'public': {
+                                    'order': [],
+                                    'registry': new Map()
+                                }
+                            },
+                        }
+                    ]
+                ])
+                );
+            });
+            test('When there are finally no presets, it registers an error', async () => {
+                const givenCmakeProject = makePopulatedDirectory(
+                    '/home/cmake-project/with-presets',
+                    [
+                        'CMakeLists.txt',
+                        {path: 'CMakePresets.json', file: makeExistingFile({onRead: givenPresetBodyWithNoPresets})},
+                        {path: 'CMakeUserPresets.json', file: makeExistingFile({onRead: givenPresetBodyWithNoPresets})}
+                    ]
+                );
+                givenGlobals.pulsar.project.getDirectories.mockImplementation(() => {
+                    return [
+                        givenCmakeProject
+                    ];
+                });
+                givenGlobals.pulsar.config.get.mockImplementation(() => {
+                    return '';
+                });
+
+                // Execute
+                await dut({}, givenGlobals);
+
+                // Verify
+                expect(givenGlobals.engine.state).toEqual(new Map([
+                    [
+                        '/home/cmake-project/with-presets',
+                        {
+                            'directory': givenCmakeProject,
+                            'isCmakeProject': true,
+                            'isLanguageCppOrC': true,
+                            'errors': [
+                                'no.preset.after.load'
+                            ],
+                            'warnings': [],
+                            'selectedCmakePreset': {},
+                            'cmakePresets': {
+                                'private': {
+                                    'order': [],
+                                    'registry': new Map()
+                                },
+                                'public': {
+                                    'order': [],
+                                    'registry': new Map()
+                                }
+                            },
+                        }
+                    ]
+                ]));
+            });
+            test('When there is an error while reading a file, it registers a warning', async () => {
+                // Prepare
+                const givenCmakeProject = makePopulatedDirectory(
+                    '/home/cmake-project/with-presets',
+                    [
+                        'CMakeLists.txt',
+                        {path: 'CMakePresets.json', file: makeExistingFile({onRead: givenSharedPresetBody})},
+                        {path: 'CMakeUserPresets.json', file: makeExistingFile({onRead: new Error('cannot read')})}
+                    ]
+                );
+                givenGlobals.pulsar.project.getDirectories.mockImplementation(() => {
+                    return [
+                        givenCmakeProject
+                    ];
+                });
+                givenGlobals.pulsar.config.get.mockImplementation(() => {
+                    return '';
+                });
+
+                // Execute
+                await dut({}, givenGlobals);
+
+                // Verify
+                expect(givenGlobals.engine.state).toEqual(new Map([
+                    [
+                        '/home/cmake-project/with-presets',
+                        {
+                            'directory': givenCmakeProject,
+                            'isCmakeProject': true,
+                            'isLanguageCppOrC': true,
+                            'errors': [],
+                            'warnings': [
+                                'cannot.read.file:CMakeUserPresets.json:Error: cannot read'
+                            ],
+                            'selectedCmakePreset': {
+                                'registry': 'public',
+                                'id': 'd'
+                            },
+                            'cmakePresets': {
+                                'private': {
+                                    'order': [],
+                                    'registry': new Map()
+                                },
+                                'public': {
+                                    'order': [
+                                        'd',
+                                        'e',
+                                        'f'
+                                    ],
+                                    'registry': new Map([
+                                        ['d', {
+                                            'name': 'd',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['e', {
+                                            'name': 'e',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }],
+                                        ['f', {
+                                            'name': 'f',
+                                            'displayName': 'whatever',
+                                            'binaryDir': '${sourceDir}/...',
+                                            'cacheVariables': {
+                                                'what': 'ever'
+                                            }
+                                        }]
+                                    ])
+                                }
+                            },
+                        }
+                    ]
+                ]));
+            });
         });
     });
     describe('== Calling deactivate() ==', () => {
