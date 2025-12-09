@@ -1,12 +1,14 @@
 'use strict';
 
 import {jest} from '@jest/globals';
+
 import {documentMock} from './mock-jsdom.js';
 import cmakeBuildProvider from '../src/cmake-build-provider';
 import {CmakeIntegrationEngine} from '../src/classCmakeIntegrationEngine';
 
 import {makePopulatedDirectory, makePopulatedReadOnlyDirectory} from './fixturesForPulsarDirectory.js';
 import {makeExistingFile} from './fixturesForPulsarFile.js';
+
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
 
@@ -49,6 +51,7 @@ beforeEach(() => {
             }
         },
         document: documentMock,
+        spawn: jest.fn(),
         log: jest.fn(),
     };
     givenGlobals = {

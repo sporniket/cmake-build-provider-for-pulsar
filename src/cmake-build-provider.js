@@ -3,6 +3,7 @@ import {createCmakeBuilderProviderClass} from './classCmakeBuilderProvider';
 import {createCmakeBuilderProviderMainViewClass} from './classCmakeBuilderProviderMainView';
 import {CmakeIntegrationEngine} from './classCmakeIntegrationEngine';
 import {CompositeDisposable, Disposable} from 'atom';
+import {spawn} from 'node:child_process';
 // TODO -- import e.g. import { CompositeDisposable, Disposable} from 'atom';
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /****************************************
@@ -18,9 +19,11 @@ the community-led, hyper-hackable text editor..
 export let subscriptions = null;
 
 function buildGlobals(givenGlobals) {
+    // implements dependency injection for testability
     const jsGlobals = {
         pulsar: givenGlobals?.pulsar || atom,
         document: givenGlobals?.document || document,
+        spawn: givenGlobals?.spawn || spawn,
         log: givenGlobals?.log || console.log
     };
     return {
