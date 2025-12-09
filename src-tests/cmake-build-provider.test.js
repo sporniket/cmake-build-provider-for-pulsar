@@ -690,6 +690,17 @@ describe('==== cmake-build-provider is a plugin for Pulsar (https://pulsar-edit.
                 ]));
             });
         });
+        describe('It enumerates available cmake targets for the selected cmake build', () => {
+            test('It registers the available targets when cmake succeeds', async() => {
+                expect(await Promise.resolve(false)).toBe(true);
+            });
+            test('It registers an error when listing the available targets fails', async() => {
+                expect(await Promise.resolve(false)).toBe(true);
+            });
+            test('It registers an error when refreshing the build directory fails', async() => {
+                expect(await Promise.resolve(false)).toBe(true);
+            });
+        });
     });
     describe('== Calling deactivate() ==', () => {
         const dut = cmakeBuildProvider.deactivate;
