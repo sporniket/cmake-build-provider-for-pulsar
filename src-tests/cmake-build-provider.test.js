@@ -694,7 +694,122 @@ describe('==== cmake-build-provider is a plugin for Pulsar (https://pulsar-edit.
             });
         });
         describe('It enumerates available cmake targets for the selected cmake build', () => {
+            const givenSharedPresetBody = JSON.stringify({
+                'version': 8,
+                'cmakeMinimumRequired': {
+                    'major': 3,
+                    'minor': 28,
+                    'patch': 0
+                },
+                'configurePresets': [
+                    {
+                        'name': 'd',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/build/d',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    },
+                    {
+                        'name': 'e',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/build/e',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    },
+                    {
+                        'name': 'f',
+                        'displayName': 'whatever',
+                        'binaryDir': '${sourceDir}/build/f',
+                        'cacheVariables': {
+                            'what': 'ever'
+                        }
+                    }
+                ]
+            });
             test('It registers the available targets when cmake succeeds', async() => {
+                // Prepare
+                const givenCmakeProject = makePopulatedDirectory(
+                    '/home/cmake-project/with-presets',
+                    [
+                        'CMakeLists.txt',
+                        {path: 'CMakePresets.json', file: makeExistingFile({onRead: givenSharedPresetBody})}
+                    ]
+                );
+                givenGlobals.pulsar.project.getDirectories.mockImplementation(() => {
+                    return [
+                        givenCmakeProject
+                    ];
+                });
+                givenGlobals.pulsar.config.get.mockImplementation(() => {
+                    return '';
+                });
+
+                // Execute
+                await dut({}, givenGlobals);
+
+                // Verify
+                expect(givenGlobals.spawn).toHaveBeenNthCalledWith(1, 'cmake', ['--preset', 'd', '--fresh'], {cwd: '/home/cmake-project/with-presets'});
+                expect(givenGlobals.spawn).toHaveBeenNthCalledWith(2, 'cmake', ['--build', '/home/cmake-project/with-presets/build/d', '--target', 'help'], {cwd: '/home/cmake-project/with-presets'});
+                expect(givenGlobals.engine.state).toEqual(new Map([
+                    [
+                        '/home/cmake-project/with-presets',
+                        {
+                            'directory': 'theDirectoryObject',
+                            'isCmakeProject': true,
+                            'isLanguageCppOrC': true,
+                            'errors': [],
+                            'warnings': [],
+                            'selectedCmakePreset': {
+                                'registry': 'public',
+                                'id': 'd',
+                                'targets': [
+                                    'all', 'clean', 'depend', 'what', 'never'
+                                ]
+                            },
+                            'cmakePresets': {
+                                'private': {
+                                    'order': [],
+                                    'registry': {}
+                                }
+                            },
+                            'public': {
+                                'order': [
+                                    'd',
+                                    'e',
+                                    'f'
+                                ],
+                                'registry': {
+                                    'd': {
+                                        'name': 'd',
+                                        'displayName': 'whatever',
+                                        'binaryDir': '${sourceDir}/build/d',
+                                        'cacheVariables': {
+                                            'what': 'ever'
+                                        }
+                                    },
+                                    'e': {
+                                        'name': 'e',
+                                        'displayName': 'whatever',
+                                        'binaryDir': '${sourceDir}/build/e',
+                                        'cacheVariables': {
+                                            'what': 'ever'
+                                        }
+                                    },
+                                    'f': {
+                                        'name': 'f',
+                                        'displayName': 'whatever',
+                                        'binaryDir': '${sourceDir}/build/f',
+                                        'cacheVariables': {
+                                            'what': 'ever'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                ]));
                 expect(await Promise.resolve(false)).toBe(true);
             });
             test('It registers an error when listing the available targets fails', async() => {
